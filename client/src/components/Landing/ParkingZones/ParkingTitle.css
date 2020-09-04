@@ -1,0 +1,14 @@
+#p-zone {
+  font-size: 25px;
+  font-weight: bold;
+  text-align: center;
+  padding-top: 25px;
+}
+#p-zone::after {
+  content: "";
+  display: block;
+  margin: 0 auto;
+  width: 5%;
+  padding-top: 20px;
+  border-bottom: 4px solid #2680eb;
+}

@@ -1,0 +1,32 @@
+#date {
+  background-color: #2680eb;
+  width: 98.5%;
+}
+#date span {
+  color: #ffffff;
+  font-weight: 400;
+  font-size: 20px;
+  justify-content: center;
+  display: flex;
+}
+#btn-search button {
+  color: #2680eb;
+  background-color: #e8f2fd;
+  border: none;
+}
+#search-btn1 button {
+  color: #f58e2e;
+  background-color: #f1e2d4;
+  border: none;
+}
+#previous-text {
+  color: #9ccbff;
+  text-transform: capitalize;
+  padding: 0 1.5em;
+  text-decoration: none;
+}
+#next-text {
+  text-transform: capitalize;
+  padding: 0 0.2em;
+  text-decoration: none;
+}

@@ -1,0 +1,15 @@
+#border {
+  border-left: 4px solid #2680eb;
+  padding: 0 1.5em;
+}
+#register {
+  font-weight: 500;
+  font-size: 25px;
+}
+#register a {
+  font-size: 25px;
+  padding: 0 1.5em;
+  color: #d3e6fb;
+  font-weight: 500;
+  cursor: pointer;
+}

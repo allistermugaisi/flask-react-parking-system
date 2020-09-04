@@ -1,0 +1,19 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+flask = "*"
+passlib = "*"
+flask-jwt-extended = "*"
+flask-sqlalchemy = "*"
+flask-bcrypt = "*"
+wheel = "*"
+flask-marshmallow = "*"
+marshmallow-sqlalchemy = "*"
+
+[requires]
+python_version = "3.7"

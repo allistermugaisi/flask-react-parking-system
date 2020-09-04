@@ -1,0 +1,52 @@
+.logo {
+  padding: 0 0.5em;
+}
+.header {
+  background-image: url("../../assets/background.png");
+  background-size: cover;
+  background-position: center;
+  min-height: 500px;
+  position: relative;
+}
+.navbarToggler {
+  border-color: #2680eb;
+  cursor: pointer;
+  color: #ffffff;
+  background-color: #2680eb;
+}
+.navbarToggler:focus {
+  border-color: #2680eb;
+}
+.brand {
+  color: #ffffff;
+}
+.brand:hover {
+  color: #ffffff;
+}
+.link {
+  color: #ffffff;
+  padding: 0.5em 0.5em;
+}
+.link:hover {
+  background-color: #2680eb;
+  color: #ffffff;
+  text-decoration: none;
+}
+/* Smartphones (portrait and landscape) ----------- */
+@media only screen and (min-device-width: 320px) and (max-device-width: 480px) {
+  .collapse {
+    padding-top: 5px;
+  }
+  .link {
+    color: #ffffff;
+    padding: 0.2em 1em;
+  }
+}
+
+.welcomeNote {
+  margin-top: 10%;
+}
+.welcomeNote h1,
+h2 {
+  font-weight: 400;
+}

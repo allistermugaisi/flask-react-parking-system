@@ -1,0 +1,20 @@
+#space {
+  justify-content: center;
+  background-color: #000000;
+  padding-top: 10px;
+  height: 40px;
+}
+#space a {
+  height: 40px;
+  padding: 0 1.5em;
+  justify-content: space-evenly;
+  font-size: 16px;
+  color: white;
+  text-decoration: none;
+}
+/* Smartphones (portrait and landscape) ----------- */
+@media only screen and (min-device-width: 320px) and (max-device-width: 480px) {
+  #space a {
+    padding: 0 0.5em;
+  }
+}

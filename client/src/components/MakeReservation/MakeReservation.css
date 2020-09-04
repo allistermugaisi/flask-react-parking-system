@@ -1,0 +1,24 @@
+#border {
+  border-left: 4px solid #2680eb;
+  padding: 0 1.5em;
+}
+#reservation {
+  font-weight: bold;
+  font-size: 25px;
+}
+#icon-color span {
+  background-color: #ffffff;
+  cursor: pointer;
+}
+#datetime input {
+  background-color: #efefef;
+}
+#datetime div button {
+  background-color: #ffffff;
+  border-bottom-right-radius: 0.25rem;
+  border-top-right-radius: 0.25rem;
+  border-left: none;
+}
+#datetime div button:focus {
+  outline: none;
+}

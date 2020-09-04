@@ -1,0 +1,7 @@
+{
+  "python.pythonPath": "/home/smart/.local/share/virtualenvs/server-2NNkLnnm/bin/python",
+  "python.formatting.provider": "autopep8",
+  "python.linting.pylintArgs": ["--load-plugins", "pylint-flask"],
+  "editor.formatOnSave": true,
+  "python.formatting.autopep8Args": ["--ignore", "E402"]
+}
