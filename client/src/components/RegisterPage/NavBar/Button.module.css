@@ -1,0 +1,22 @@
+:root {
+  --primary: #1888ff;
+}
+.btn {
+  padding: 0.5em 0.5em;
+  border-radius: 4px;
+  outline: none;
+  border: none;
+  line-height: inherit;
+  color: #fff;
+  font-size: 1rem;
+  justify-content: space-evenly;
+  cursor: pointer;
+  background-color: transparent;
+}
+.btn:hover {
+  padding: 0.5em 0.5em;
+  transition: all 0.3s ease-out;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 4px;
+}

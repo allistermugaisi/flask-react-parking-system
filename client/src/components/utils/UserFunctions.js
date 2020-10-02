@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const register = async (newUser) => {
+export const registerUser = async (newUser) => {
   return await axios
     .post("users/register", {
       username: newUser.username,

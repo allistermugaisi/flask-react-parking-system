@@ -1,6 +1,6 @@
 #date {
   background-color: #2680eb;
-  width: 98.5%;
+  width: 100%;
 }
 #date span {
   color: #ffffff;
@@ -29,4 +29,45 @@
   text-transform: capitalize;
   padding: 0 0.2em;
   text-decoration: none;
+}
+
+.timer-container {
+  color: #fff;
+  width: 100vw;
+  height: 100vh;
+}
+.timer {
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex: column;
+  align-items: center;
+  justify-content: center;
+}
+.timer div:first-child {
+  text-align: center;
+}
+h2 {
+  font-weight: 600;
+  margin-bottom: 0.5em;
+}
+.timer div:last-child {
+  border: solid #fff;
+  border-radius: 3px;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding: 3em;
+  margin-top: 3em;
+  text-align: center;
+}
+.timer div:last-child span {
+  font-size: 3em;
+}
+.noWrap {
+  white-space: nowrap;
+}
+#available {
+  background-color: #e8f2fd;
+}
+#unavailable {
+  background-color: #f1e2d4;
 }

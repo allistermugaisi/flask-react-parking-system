@@ -1,10 +1,14 @@
 import React from "react";
+import Navbar from "../Navbar/Navbar";
 
 const Reports = () => {
   return (
-    <div>
-      <h1>Reports</h1>
-    </div>
+    <React.Fragment>
+      <Navbar />
+      <div className="reports">
+        <h1>Reports</h1>
+      </div>
+    </React.Fragment>
   );
 };
 

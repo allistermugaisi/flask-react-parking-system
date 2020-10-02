@@ -1,0 +1,12 @@
+export { default as Navbar } from "./Navbar/Navbar";
+export { default as dashboard } from "./pages/Dashboard";
+export { default as Availability } from "./pages/Availability";
+export { default as Help } from "./pages/Help";
+export { default as Quicksetup } from "./pages/Quicksetup";
+export { default as Reports } from "./pages/Reports";
+export { default as Reservation } from "./pages/Reservation";
+export { default as Schedule } from "./pages/Schedule";
+export { default as Sitesettings } from "./pages/Sitesettings";
+export { default as Users } from "./pages/Users";
+export { default as Resources } from "./pages/Resources";
+export { default as Subscription } from "./pages/Subscription";

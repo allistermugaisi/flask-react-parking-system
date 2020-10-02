@@ -22,3 +22,19 @@
 #datetime div button:focus {
   outline: none;
 }
+#amount {
+  font-weight: 500;
+  font-size: 20px;
+}
+#price {
+  font-weight: bold;
+  font-size: 16px;
+}
+#pay-btn {
+  padding-right: 2rem;
+  padding-left: 2rem;
+  width: 250px;
+}
+.noWrap {
+  white-space: nowrap;
+}

@@ -1,10 +1,14 @@
 import React from "react";
+import Navbar from "../Navbar/Navbar";
 
 const Quicksetup = () => {
   return (
-    <div>
-      <h1>Quicksetup</h1>
-    </div>
+    <React.Fragment>
+      <Navbar />
+      <div className="quick-setup">
+        <h1>Quicksetup</h1>
+      </div>
+    </React.Fragment>
   );
 };
 

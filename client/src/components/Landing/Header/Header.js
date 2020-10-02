@@ -1,123 +1,125 @@
-import React, { useState } from "react";
+import React, { Fragment, useState } from "react";
 import { Link, withRouter } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import logo from "../../assets/logo.png";
-import styles from "./Header.module.css";
+import "./Header.css";
+import { Button } from "./Button";
+import UserLoggedInButton from "./UserLoggedInButton";
 import Datetimepickerform from "./Datetimepickerform/Datetimepickerform";
 import * as Scroll from "react-scroll";
-import {
-  Container,
-  Nav,
-  Navbar,
-  NavbarBrand,
-  NavbarToggler,
-  Collapse,
-  NavItem,
-} from "reactstrap";
+import styled from "styled-components";
 
 toast.configure();
+
+// const Container = styled.div`
+//   display: flex;
+//   padding: 1rem;
+//   justify-content: flex-end;
+//   align-items: center;
+//   margin-bottom: 3rem;
+// `;
+
+const ProfileImg = styled.img`
+  height: 2rem;
+  margin: 0 1rem;
+  cursor: pointer;
+`;
+
+const MessageIcon = styled.span`
+  color: #fff;
+  font-size: 27px;
+  cursor: pointer;
+`;
 const Header = (props) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [click, setClick] = useState(false);
 
-  const toggle = () => setIsOpen(!isOpen);
-
-  const logOut = (e) => {
-    e.preventDefault();
-    localStorage.removeItem("usertoken");
-    toast.info("Successfully logged out!", {
-      position: toast.POSITION.TOP_CENTER,
-      autoClose: 3000,
-    });
-    props.history.push("/");
+  const handleClick = () => {
+    setClick(!click);
   };
 
-  const userLink = (
-    <Nav className="ml-auto" navbar>
-      <NavItem>
-        <Link className={styles.link} to="/profile">
-          Profile
-        </Link>
-      </NavItem>
-      <NavItem>
-        <Link className={styles.link} to="#" onClick={logOut}>
-          LogOut
-        </Link>
-      </NavItem>
-    </Nav>
-  );
+  const closeMobileMenu = () => setClick(false);
+
+  let isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+
+  // const userLink = (
+  //   <Fragment>
+  //     <li className="nav-item">
+  //       <Link
+  //         className="nav-links"
+  //         to="/user-profile/dashboard"
+  //         onClick={closeMobileMenu}
+  //       >
+  //         Profile
+  //       </Link>
+  //     </li>
+  //     <li className="nav-item">
+  //       <Link className="nav-links" to="#" onClick={logOutUser}>
+  //         LogOut
+  //       </Link>
+  //     </li>
+  //   </Fragment>
+  // );
 
   return (
-    <div className={styles.header}>
-      <Navbar expand="sm" className="mb-5 bg-transparent">
-        <Container>
-          <img src={logo} alt="logo" className={styles.logo} />
-          <NavbarBrand className={styles.brand} href="/">
+    <Fragment>
+      <div className="header">
+        <nav className="navbar-landing">
+          <img src={logo} alt="logo" className="navbar-brand" />
+          <Link to="#" className="navbar-logo" onClick={closeMobileMenu}>
             RESERVATION
-          </NavbarBrand>
-          <NavbarToggler className={styles.navbarToggler} onClick={toggle} />
-          <Collapse isOpen={isOpen} navbar className={styles.collapse}>
-            <Nav className="ml-auto" navbar style={{ paddingRight: "30px" }}>
-              <NavItem>
-                <Link className={styles.link} to="/">
-                  Home
-                </Link>
-              </NavItem>
-              <NavItem>
-                <Scroll.Link
-                  className={styles.link}
-                  to="p-zone"
-                  smooth={true}
-                  spy={true}
-                  duration={1200}
-                  style={{ cursor: "pointer" }}
-                >
-                  Zones
-                </Scroll.Link>
-              </NavItem>
-              <NavItem>
-                <Scroll.Link
-                  className={styles.link}
-                  to="about"
-                  smooth={true}
-                  duration={1300}
-                  style={{ cursor: "pointer" }}
-                >
-                  About
-                </Scroll.Link>
-              </NavItem>
-            </Nav>
-            {localStorage.usertoken ? (
-              userLink
-            ) : (
-              <Nav className="ml-auto" navbar>
-                <NavItem>
-                  <Link className={styles.link} to="/login">
-                    Login
-                  </Link>
-                </NavItem>
-                <NavItem>
-                  <Link className={styles.link} to="/register">
-                    Register
-                  </Link>
-                </NavItem>
-              </Nav>
-            )}
-          </Collapse>
-        </Container>
-      </Navbar>
+          </Link>
+          <div className="menu-icon" onClick={handleClick}>
+            <i className={click ? "fas fa-times" : "fas fa-bars"} />
+          </div>
+          <ul className={click ? "nav-menu active " : "nav-menu"}>
+            <li className="nav-item">
+              <Link to="/" className="nav-links" onClick={closeMobileMenu}>
+                Home
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Scroll.Link
+                className="nav-links"
+                to="p-zone"
+                smooth={true}
+                spy={true}
+                duration={1200}
+                style={{ cursor: "pointer" }}
+                onClick={closeMobileMenu}
+              >
+                Zones
+              </Scroll.Link>
+            </li>
+            <li className="nav-item">
+              <Scroll.Link
+                className="nav-links"
+                to="about"
+                smooth={true}
+                duration={1300}
+                style={{ cursor: "pointer" }}
+                onClick={closeMobileMenu}
+              >
+                About
+              </Scroll.Link>
+            </li>
+          </ul>
+          {isAuthenticated ? <UserLoggedInButton /> : <Button />}
+        </nav>
 
-      <div className={styles.welcomeNote}>
-        <div className="row max-height justify-content-center align-items-center">
-          <div className="mx-auto text-white text-center">
-            <h1>Welcome to RESERVATION</h1>
-            <h2 className="my-2">Parking</h2>
+        <div className="welcomeNote">
+          <div className="row max-height justify-content-center align-items-center">
+            <div className="mx-auto text-white text-center">
+              <h1 className="tags">Welcome to RESERVATION</h1>
+              <h2 className="my-2 tags">Parking</h2>
+            </div>
           </div>
         </div>
-      </div>
 
-      <Datetimepickerform />
-    </div>
+        <Datetimepickerform />
+      </div>
+    </Fragment>
   );
 };
 

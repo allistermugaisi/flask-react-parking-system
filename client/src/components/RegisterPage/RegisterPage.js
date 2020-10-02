@@ -1,8 +1,12 @@
-import React, { useState } from "react";
+import React, { Fragment } from "react";
 import { Link, withRouter } from "react-router-dom";
+// import PropTypes from "prop-types";
+import { useDispatch } from "react-redux";
+import { registerUser } from "../../actions/authActions";
+import { returnErrors, registerFail } from "../../actions/errorActions";
+import { useForm } from "react-hook-form";
 import NavBar from "./NavBar/NavBar";
 import Footer from "./Footer/Footer";
-import { register } from "../utils/UserFunctions";
 import "./RegisterPage.css";
 import { useSpring, animated } from "react-spring";
 import { toast } from "react-toastify";
@@ -16,133 +20,62 @@ library.add(faEye, faEyeSlash);
 
 toast.configure();
 const RegisterPage = ({ history }) => {
-  const [Value, setValue] = useState({
-    username: "",
-    email: "",
-    phone_number: "",
-    password: "",
-    confirm_password: "",
-  });
-  const [Errors] = useState({
-    username: "",
-    email: "",
-    phone_number: "",
-    password: "",
-    confirm_password: "",
-  });
-  const [Validity] = useState({
-    phone_number: false,
-    username: false,
-    email: false,
-    password: false,
-    confirm_password: false,
-  });
+  const dispatch = useDispatch();
 
   const [PasswordInputType, ToggleIcon] = usePasswordToggle();
   const [ConfirmPasswordInputType, ConfirmToggleIcon] = usePasswordToggle();
 
-  const [loginButtonElement, setButtonLoading] = useButtonLoader(
+  const [registerButtonElement, setButtonLoading] = useButtonLoader(
     "Register",
     "Loading"
   );
 
-  const handleChange = ({ target }) => {
-    Value[target.name] = target.value;
-    setValue({ ...Value, Value });
-    handleValidation(target);
-  };
+  const { register, handleSubmit, getValues, errors } = useForm();
 
-  const handleValidation = (target) => {
-    const { name, value } = target;
-    const isEmail = name === "email";
-    const isPassword = name === "password";
-    const isConfirmPassword = name === "confirm_password";
-    const emailTest = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+  const onSubmit = (data, e) => {
+    e.preventDefault();
+    setButtonLoading(true);
 
-    Validity[name] = value.length > 0;
-    Errors[name] = Validity[name]
-      ? ""
-      : `${name} is required and cannot be empty`;
+    // Create user object
+    const newUser = {
+      username: data.username,
+      email: data.email,
+      phone_number: data.phone_number,
+      password: data.password,
+      confirm_password: data.confirm_password,
+    };
 
-    if (Validity[name]) {
-      if (isEmail) {
-        Validity[name] = emailTest.test(value);
-        Errors[name] = Validity[name]
-          ? ""
-          : `${name} should be a valid email address`;
-      }
-      if (isPassword) {
-        Validity[name] = value.length >= 6;
-        Errors[name] = Validity[name]
-          ? ""
-          : `${name} should be 6 characters minimum`;
-      }
-      if (isConfirmPassword) {
-        Validity[name] = value.length >= 6;
-        Errors[name] = Validity[name]
-          ? ""
-          : `${name} should be 6 characters minimum`;
-      }
-    }
-  };
-
-  const handleOnSubmit = (event) => {
-    event.preventDefault();
-
-    if (Object.values(Validity).every(Boolean)) {
-      setButtonLoading(true);
-
-      const newUser = {
-        username: Value.username,
-        email: Value.email,
-        phone_number: Value.phone_number,
-        password: Value.password,
-        confirm_password: Value.confirm_password,
-      };
-
-      register(newUser).then((response) => {
-        // console.log(response);
-
-        // === "Password do not match" is referenced exactly with the server. Do not change the string ===
-
-        if (response.password_match) {
-          toast.error("Passwords do not match!", {
-            position: toast.POSITION.TOP_CENTER,
-            autoClose: 3000,
-          });
-          history.push("/register");
-
-          // === "User already exists" is referenced exactly with the server. Do not change the string ===
-        } else if (response.user_exist) {
-          toast.error(
-            "User already registered, use a different email address and phone number!",
-            {
-              position: toast.POSITION.TOP_CENTER,
-              autoClose: 3000,
-            }
-          );
-          history.push("/register");
-        } else if (response.result) {
+    // Attempt to register user
+    dispatch(registerUser(newUser))
+      .then((response) => {
+        if (response.payload.message) {
           history.push("/login");
-          toast.success("Successfully registered!", {
+          toast.success("User successfully registered!", {
             position: toast.POSITION.TOP_CENTER,
             autoClose: 3000,
           });
-        } else {
-          history.push("/register");
+          e.target.reset();
         }
+      })
+      .catch((error) => {
+        dispatch(
+          returnErrors(
+            error.response.data,
+            error.response.status,
+            "REGISTER_FAIL"
+          )
+        );
+        dispatch(registerFail());
 
+        if (error.response.data) {
+          history.push("/register");
+          toast.error("User already exists!", {
+            position: toast.POSITION.TOP_CENTER,
+            autoClose: 3000,
+          });
+        }
         setButtonLoading(false);
       });
-    } else {
-      for (let key in Value) {
-        let target = {
-          name: key,
-          value: Value[key],
-        };
-        handleValidation(target);
-      }
-    }
   };
 
   const props = useSpring({
@@ -154,8 +87,9 @@ const RegisterPage = ({ history }) => {
     opacity: 1,
     transform: "translate(40px,0)",
   });
+
   return (
-    <React.Fragment>
+    <Fragment>
       <NavBar />
       <animated.div className="container" id="border" style={props}>
         <p id="register">
@@ -169,101 +103,206 @@ const RegisterPage = ({ history }) => {
       <br />
       <br />
       <div className="container">
-        <div className="row">
-          <div className="col-sm-12 col-md-3">
-            <div className="input-group" id="input-color">
-              <input
-                name="username"
-                type="text"
-                className={`form-control ${
-                  Errors.username ? "is-invalid" : ""
-                }`}
-                placeholder="Username"
-                value={Value.username}
-                onChange={handleChange}
-              />
-              <span className="invalid-feedback">{Errors.username}</span>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="row">
+            <div className="col-sm-12 col-md-3">
+              <div className="input-group" id="input-color">
+                <input
+                  type="text"
+                  className={`form-control ${
+                    errors.username ? "is-invalid" : ""
+                  }`}
+                  placeholder="Username"
+                  name="username"
+                  ref={register({
+                    required: true,
+                  })}
+                />
+              </div>
+              {errors.username && errors.username.type === "required" && (
+                <span
+                  style={{
+                    fontSize: "13px",
+                    fontWeight: "500",
+                    color: "#bf1650",
+                  }}
+                >
+                  Username is required!
+                </span>
+              )}
+            </div>
+            &nbsp;
+            <div className="col-sm-12 col-md-3">
+              <div className="input-group" id="input-color">
+                <input
+                  type="text"
+                  className={`form-control ${errors.email ? "is-invalid" : ""}`}
+                  placeholder="Email address"
+                  name="email"
+                  ref={register({
+                    required: "Email is required!",
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: "Invalid email address",
+                    },
+                  })}
+                />
+              </div>
+              <span
+                style={{
+                  fontSize: "13px",
+                  fontWeight: "500",
+                  color: "#bf1650",
+                }}
+              >
+                {errors.email && errors.email.message}
+              </span>
             </div>
           </div>
           &nbsp;
-          <div className="col-sm-12 col-md-3">
-            <div className="input-group" id="input-color">
-              <input
-                name="email"
-                type="email"
-                className={`form-control ${Errors.email ? "is-invalid" : ""}`}
-                placeholder="Email Address"
-                value={Value.email}
-                onChange={handleChange}
-              />
-              <span className="invalid-feedback">{Errors.email}</span>
+          <div className="row">
+            <div className="col-sm-12 col-md-3">
+              <div className="input-group" id="input-color">
+                <input
+                  type="tel"
+                  className={`form-control ${
+                    errors.phone_number ? "is-invalid" : ""
+                  }`}
+                  placeholder="Mobile number"
+                  name="phone_number"
+                  ref={register({
+                    required: true,
+                    maxLength: 10,
+                    pattern: {
+                      value: /^[0-9]+$/,
+                      message: " Mobile number should be a number",
+                    },
+                  })}
+                />
+              </div>
+              {errors.phone_number && errors.phone_number.type === "required" && (
+                <span
+                  style={{
+                    fontSize: "13px",
+                    fontWeight: "500",
+                    color: "#bf1650",
+                  }}
+                >
+                  Mobile number is required!
+                </span>
+              )}
+              {errors.phone_number && (
+                <span
+                  style={{
+                    fontSize: "12px",
+                    fontWeight: "500",
+                    color: "#bf1650",
+                  }}
+                >
+                  {errors.phone_number.message}
+                </span>
+              )}
+              {errors.phone_number && errors.phone_number.type === "maxLength" && (
+                <span
+                  style={{
+                    fontSize: "12px",
+                    fontWeight: "500",
+                    color: "#bf1650",
+                  }}
+                >
+                  Mobile should be 10 characters maximum
+                </span>
+              )}
             </div>
           </div>
-        </div>
-      </div>
-      <br />
-      <br />
-      <div className="container">
-        <div className="row">
-          <div className="col-sm-12 col-md-3">
-            <div className="input-group" id="input-color">
-              <input
-                name="phone_number"
-                type="number"
-                min="0"
-                className={`form-control ${
-                  Errors.phone_number ? "is-invalid" : ""
-                }`}
-                placeholder="Phone no."
-                value={Value.phone_number}
-                onChange={handleChange}
-              />
-              <span className="invalid-feedback">{Errors.phone_number}</span>
-            </div>
-          </div>
+          <br />
           &nbsp;
-        </div>
-      </div>
-      <br />
-      <br />
-      <div className="container">
-        <div className="row">
-          <div className="col-sm-12 col-md-3">
-            <div className="input-group" id="input-color">
-              <input
-                type={PasswordInputType}
-                name="password"
-                className={`form-control ${
-                  Errors.password ? "is-invalid" : ""
-                }`}
-                placeholder="Password"
-                value={Value.password}
-                onChange={handleChange}
-              />
-              {`${Errors.password}` ? (
-                <span className="invalid-feedback">{Errors.password}</span>
+          <div className="row">
+            <div className="col-sm-12 col-md-3">
+              <div className="input-group" id="input-color">
+                <input
+                  type={PasswordInputType}
+                  className={`form-control ${
+                    errors.password ? "is-invalid" : ""
+                  }`}
+                  placeholder="Password"
+                  name="password"
+                  ref={register({
+                    required: true,
+                    minLength: 6,
+                  })}
+                />
+              </div>
+              {errors.password ? (
+                (errors.password.type === "required" && (
+                  <span
+                    style={{
+                      fontSize: "13px",
+                      fontWeight: "500",
+                      color: "#bf1650",
+                    }}
+                  >
+                    Password is required!
+                  </span>
+                )) ||
+                (errors.password.type === "minLength" && (
+                  <span
+                    style={{
+                      fontSize: "12px",
+                      fontWeight: "500",
+                      color: "#bf1650",
+                    }}
+                  >
+                    Password should be atleast 6 characters
+                  </span>
+                ))
               ) : (
                 <span className="password-toggle-icon">{ToggleIcon}</span>
               )}
             </div>
-          </div>
-          &nbsp;
-          <div className="col-sm-12 col-md-3">
-            <div className="input-group" id="input-color">
-              <input
-                type={ConfirmPasswordInputType}
-                name="confirm_password"
-                className={`form-control ${
-                  Errors.confirm_password ? "is-invalid" : ""
-                }`}
-                placeholder="Confirm Password"
-                value={Value.confirm_password}
-                onChange={handleChange}
-              />
-              {`${Errors.confirm_password}` ? (
-                <span className="invalid-feedback">
-                  {Errors.confirm_password}
-                </span>
+            &nbsp;
+            <div className="col-sm-12 col-md-3">
+              <div className="input-group" id="input-color">
+                <input
+                  type={ConfirmPasswordInputType}
+                  className={`form-control ${
+                    errors.confirm_password ? "is-invalid" : ""
+                  }`}
+                  placeholder="Confirm Password"
+                  name="confirm_password"
+                  ref={register({
+                    required: true,
+                    validate: {
+                      matchesPreviousPassword: (value) => {
+                        const { password } = getValues();
+                        return password === value || "Passwords should match!";
+                      },
+                    },
+                  })}
+                />
+              </div>
+              {errors.confirm_password ? (
+                (errors.confirm_password.type === "required" && (
+                  <span
+                    style={{
+                      fontSize: "13px",
+                      fontWeight: "500",
+                      color: "#bf1650",
+                    }}
+                  >
+                    Please confirm password!
+                  </span>
+                )) || (
+                  <span
+                    style={{
+                      fontSize: "12px",
+                      fontWeight: "500",
+                      color: "#bf1650",
+                    }}
+                  >
+                    {errors.confirm_password.message}
+                  </span>
+                )
               ) : (
                 <span className="password-toggle-icon">
                   {ConfirmToggleIcon}
@@ -271,25 +310,22 @@ const RegisterPage = ({ history }) => {
               )}
             </div>
           </div>
-        </div>
-      </div>
-      <br />
-      <div className="container" id="search-btn">
-        <div className="input-group-append">
-          <button
-            className="btn btn-md btn-primary m-0"
-            onClick={handleOnSubmit}
-            ref={loginButtonElement}
-            type="button"
-          >
-            Register
-          </button>
-        </div>
+          <br />
+          <div id="login-btn">
+            <button
+              className="btn btn-md btn-primary m-0"
+              type="submit"
+              ref={registerButtonElement}
+            >
+              Register
+            </button>
+          </div>
+        </form>
       </div>
       <br />
       <br />
       <Footer />
-    </React.Fragment>
+    </Fragment>
   );
 };
 

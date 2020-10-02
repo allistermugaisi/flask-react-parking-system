@@ -5,9 +5,9 @@ function Footer() {
   return (
     <React.Fragment>
       <div className="row" id="space">
-        <Link to="#">PARKING ZONE A</Link>
-        <Link to="#">PARKING ZONE B</Link>
-        <Link to="#">PARKING ZONE C</Link>
+        <Link to="/zones/zone-a">PARKING ZONE A</Link>
+        <Link to="/zones/zone-b">PARKING ZONE B</Link>
+        <Link to="/zones/zone-c">PARKING ZONE C</Link>
       </div>
       <div
         className="footer-copyright text-center py-3"

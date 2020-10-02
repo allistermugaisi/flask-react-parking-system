@@ -1,10 +1,14 @@
 import React from "react";
+import Navbar from "../Navbar/Navbar";
 
 const Subscription = () => {
   return (
-    <div>
-      <h1>Subscription</h1>
-    </div>
+    <React.Fragment>
+      <Navbar />
+      <div className="subscription">
+        <h1>Subscription</h1>
+      </div>
+    </React.Fragment>
   );
 };
 

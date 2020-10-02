@@ -3,6 +3,7 @@ import { Link, withRouter } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import styled from "styled-components";
 import styles from "./Profile.module.css";
 import logo from "../assets/logo.png";
 
@@ -17,6 +18,7 @@ import {
 } from "reactstrap";
 
 toast.configure();
+
 const Profile = (props) => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
