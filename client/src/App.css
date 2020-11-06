@@ -25,3 +25,25 @@ body {
     transform: translateY(-1px);
   }
 }
+.dashboard,
+.reports,
+.reservations,
+.availability,
+.help,
+.site-settings,
+.subscription,
+.users,
+.quick-setup,
+.resources,
+.schedule,
+.settings,
+.payments,
+.offers,
+.user-reservations,
+.home {
+  display: flex;
+  height: 90vh;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+}

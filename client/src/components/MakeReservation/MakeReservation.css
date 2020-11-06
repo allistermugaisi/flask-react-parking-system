@@ -22,3 +22,25 @@
 #datetime div button:focus {
   outline: none;
 }
+#amount {
+  font-weight: 500;
+  font-size: 20px;
+}
+#price {
+  font-weight: bold;
+  font-size: 16px;
+}
+#td-slots button:hover {
+  transform: scale(0.98);
+}
+#pay-btn {
+  padding-right: 2rem;
+  padding-left: 2rem;
+  width: 250px;
+}
+#pay-btn a:hover {
+  transform: scale(0.98);
+}
+.noWrap {
+  white-space: nowrap;
+}

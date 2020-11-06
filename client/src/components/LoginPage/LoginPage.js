@@ -1,11 +1,18 @@
-import React, { useState } from "react";
+import React, { Fragment } from "react";
 import { Link, withRouter } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { loginUser } from "../../actions/authActions";
+import {
+  returnErrors,
+  clearErrors,
+  loginFail,
+} from "../../actions/errorActions";
+import { useForm } from "react-hook-form";
 import NavBar from "../RegisterPage/NavBar/NavBar";
 import Footer from "../RegisterPage/Footer/Footer";
 import "./LoginPage.css";
 import usePasswordToggle from "../utils/usePasswordToggle";
 import useButtonLoader from "../utils/useButtonLoader";
-import { login } from "../utils/UserFunctions";
 import { useSpring, animated } from "react-spring";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -16,90 +23,53 @@ library.add(faEye, faEyeSlash);
 
 toast.configure();
 const LoginPage = ({ history }) => {
-  const [Value, setValue] = useState({ email: "", password: "" });
-  const [Errors] = useState({ email: "", password: "" });
-  const [Validity] = useState({ email: false, password: false });
+  const dispatch = useDispatch();
 
   const [PasswordInputType, ToggleIcon] = usePasswordToggle();
-
   const [loginButtonElement, setButtonLoading] = useButtonLoader(
     "Login",
     "Loading"
   );
+  const { register, handleSubmit, errors } = useForm();
 
-  const handleChange = ({ target }) => {
-    Value[target.name] = target.value;
-    setValue({ ...Value, Value });
-    handleValidation(target);
-  };
+  const onSubmit = (data, e) => {
+    e.preventDefault();
+    setButtonLoading(true);
 
-  const handleValidation = (target) => {
-    const { name, value } = target;
-    const isEmail = name === "email";
-    const isPassword = name === "password";
-    const emailTest = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+    // Create user object
+    const user = {
+      email: data.email,
+      password: data.password,
+    };
 
-    Validity[name] = value.length > 0;
-    Errors[name] = Validity[name]
-      ? ""
-      : `${name} is required and cannot be empty`;
-
-    if (Validity[name]) {
-      if (isEmail) {
-        Validity[name] = emailTest.test(value);
-        Errors[name] = Validity[name]
-          ? ""
-          : `${name} should be a valid email address`;
-      }
-      if (isPassword) {
-        Validity[name] = value.length >= 6;
-        Errors[name] = Validity[name]
-          ? ""
-          : `${name} should be 6 characters minimum`;
-      }
-    }
-  };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-
-    if (Object.values(Validity).every(Boolean)) {
-      setButtonLoading(true);
-
-      const user = {
-        email: Value.email,
-
-        password: Value.password,
-      };
-
-      login(user).then((response) => {
-        //console.log(response);
-        if (response.access_denied) {
-          history.push("/login");
-          toast.error("Invalid username or password!", {
-            position: toast.POSITION.TOP_CENTER,
-            autoClose: 3000,
-          });
-        } else if (response.access_token) {
-          history.push("/profile");
+    // Attempt to authenticate user
+    dispatch(loginUser(user))
+      .then((response) => {
+        if (response.payload.token) {
+          history.push("/");
           toast.success("Successfully logged in!", {
             position: toast.POSITION.TOP_CENTER,
             autoClose: 3000,
           });
-        } else {
+          e.target.reset();
+          dispatch(clearErrors());
+        }
+      })
+      .catch((error) => {
+        dispatch(
+          returnErrors(error.response.data, error.response.status, "LOGIN_FAIL")
+        );
+        dispatch(loginFail());
+
+        if (error.response.data) {
           history.push("/login");
+          toast.error("Invalid Credentials!", {
+            position: toast.POSITION.TOP_CENTER,
+            autoClose: 3000,
+          });
         }
         setButtonLoading(false);
       });
-    } else {
-      for (let key in Value) {
-        let target = {
-          name: key,
-          value: Value[key],
-        };
-        handleValidation(target);
-      }
-    }
   };
 
   const props = useSpring({
@@ -107,15 +77,13 @@ const LoginPage = ({ history }) => {
       opacity: 0,
       transform: "translate(-800px,0)",
     },
-
     opacity: 1,
     transform: "translate(40px,0)",
   });
 
   return (
-    <React.Fragment>
+    <Fragment>
       <NavBar />
-
       <animated.div className="container" id="border" style={props}>
         <p id="register">
           Login
@@ -127,78 +95,105 @@ const LoginPage = ({ history }) => {
       </animated.div>
       <br />
       <br />
-
       <div className="container">
-        <div className="row">
+        <form onSubmit={handleSubmit(onSubmit)}>
           <div className="col-sm-12 col-md-3">
             <div className="input-group" id="input-color">
               <input
+                type="text"
+                className={`form-control ${errors.email ? "is-invalid" : ""}`}
+                placeholder="Email address"
                 name="email"
-                type="email"
-                className={`form-control ${Errors.email ? "is-invalid" : ""}`}
-                placeholder="Email Address"
-                value={Value.email}
-                onChange={handleChange}
+                ref={register({
+                  required: "Email is required!",
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: "Invalid email address",
+                  },
+                })}
               />
-              <span className="invalid-feedback">{Errors.email}</span>
             </div>
+            <span
+              style={{ fontSize: "13px", fontWeight: "500", color: "#bf1650" }}
+            >
+              {errors.email && errors.email.message}
+            </span>
           </div>
-        </div>
-      </div>
-      <br />
-      <br />
-      <div className="container">
-        <div className="row">
+          <br />
           <div className="col-sm-12 col-md-3">
             <div className="input-group" id="input-color">
               <input
-                name="password"
                 type={PasswordInputType}
                 className={`form-control ${
-                  Errors.password ? "is-invalid" : ""
+                  errors.password ? "is-invalid" : ""
                 }`}
                 placeholder="Password"
-                value={Value.password}
-                onChange={handleChange}
+                name="password"
+                ref={register({
+                  required: true,
+                  minLength: 6,
+                })}
               />
-              {`${Errors.password}` ? (
-                <span className="invalid-feedback">{Errors.password}</span>
-              ) : (
-                <span className="password-toggle-icon">{ToggleIcon}</span>
-              )}
             </div>
+            {errors.password ? (
+              (errors.password.type === "required" && (
+                <span
+                  style={{
+                    fontSize: "13px",
+                    fontWeight: "500",
+                    color: "#bf1650",
+                  }}
+                >
+                  Password is required!
+                </span>
+              )) ||
+              (errors.password.type === "minLength" && (
+                <span
+                  style={{
+                    fontSize: "12px",
+                    fontWeight: "500",
+                    color: "#bf1650",
+                  }}
+                >
+                  Password should be atleast 6 characters
+                </span>
+              ))
+            ) : (
+              <span className="password-toggle-icon">{ToggleIcon}</span>
+            )}
           </div>
-        </div>
+          <br />
+          <div className="container">
+            <Link
+              to="/request_reset_password"
+              style={{ textDecoration: "None", cursor: "pointer" }}
+            >
+              Forgot Your Password?
+            </Link>
+            <p className="mt-3" style={{ color: "#2680eb" }}>
+              Don't have an account? &nbsp;
+              <Link
+                style={{ textDecoration: "None", cursor: "pointer" }}
+                to="/register"
+              >
+                register
+              </Link>
+            </p>
+          </div>
+          <div className="container" id="login-btn">
+            <button
+              className="btn btn-md btn-primary m-0"
+              type="submit"
+              ref={loginButtonElement}
+            >
+              Login
+            </button>
+          </div>
+        </form>
       </div>
-      <br />
-      <div className="container">
-        <p style={{ color: "#2680eb" }}>Forgot Your Password?</p>
-        <p style={{ color: "#2680eb" }}>
-          Don't have an account? &nbsp;
-          <Link
-            style={{ textDecoration: "None", cursor: "pointer" }}
-            to="/register"
-          >
-            register
-          </Link>
-        </p>
-      </div>
-      <br />
-      <div className="container">
-        <div className="input-group-append" id="search-btn">
-          <button
-            className="btn btn-md btn-primary m-0"
-            onClick={handleSubmit}
-            ref={loginButtonElement}
-          >
-            Login
-          </button>
-        </div>
-      </div>
-      <br />
       <br />
       <Footer />
-    </React.Fragment>
+    </Fragment>
   );
 };
 

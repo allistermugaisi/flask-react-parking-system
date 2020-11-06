@@ -1,10 +1,14 @@
 import React from "react";
+import Navbar from "../Navbar/Navbar";
 
 const Dashboard = () => {
   return (
-    <div>
-      <h1>Dashboard</h1>
-    </div>
+    <React.Fragment>
+      <Navbar />
+      <div className="dashboard">
+        <h1>Dashboard</h1>
+      </div>
+    </React.Fragment>
   );
 };
 

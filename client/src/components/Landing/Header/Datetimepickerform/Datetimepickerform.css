@@ -1,4 +1,4 @@
-/* Laptops (SScreen size of laptops and above) */
+/* Laptops (Screen size of laptops and above) */
 #halfway-button {
   padding: 15px;
   justify-content: space-between;
@@ -27,6 +27,9 @@
   border-bottom-right-radius: 0.25rem;
   border-top-right-radius: 0.25rem;
 }
+#display-none {
+  display: none;
+}
 #datetimepicker div button {
   background-color: #ffffff;
   border-bottom-right-radius: 0.25rem;
@@ -43,4 +46,7 @@
   padding-right: 2rem;
   padding-left: 2rem;
   width: 150px;
+}
+#search-btn button:hover {
+  transform: scale(0.98);
 }

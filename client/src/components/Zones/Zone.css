@@ -1,6 +1,6 @@
 #date {
   background-color: #2680eb;
-  width: 98.5%;
+  width: 100%;
 }
 #date span {
   color: #ffffff;
@@ -29,4 +29,49 @@
   text-transform: capitalize;
   padding: 0 0.2em;
   text-decoration: none;
+}
+#sdate {
+  cursor: pointer;
+}
+.table th {
+  text-align: center;
+  cursor: default;
+}
+.table td {
+  border: 1px solid #e8f2fd;
+  cursor: pointer;
+  text-align: center;
+}
+.table td:hover {
+  background-color: #2680eb;
+}
+#td-slots {
+  cursor: default;
+  border: none;
+}
+#td-slots:hover {
+  background-color: #fff;
+}
+.noWrap {
+  white-space: nowrap;
+}
+#available {
+  background-color: #e8f2fd;
+}
+#unavailable {
+  background-color: #f1e2d4;
+}
+.slot {
+  margin: 10px;
+  transition: background-color 0.1 ease-in-out;
+}
+.inactive {
+  background-color: #f39c12;
+}
+.active {
+  background-color: #3498db;
+}
+.slot-loading {
+  justify-content: center;
+  display: flex;
 }

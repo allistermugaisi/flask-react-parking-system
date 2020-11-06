@@ -1,5 +1,19 @@
-#zone-input {
+#zone-input select {
   background-color: #efefef;
   border-bottom-right-radius: 0.25rem;
+  border-bottom-left-radius: 0.25rem;
   border-top-right-radius: 0.25rem;
+  border-top-left-radius: 0.25rem;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none; /* Remove default arrow */
+  /* background-image: url(...);   Add custom arrow */
+}
+#zone-btn {
+  padding-right: 1.5rem;
+  padding-left: 1rem;
+  width: 75px;
+}
+#zone-btn button:hover {
+  transform: scale(0.98);
 }

@@ -4,3 +4,5 @@ export { default as RegisterPage } from "./RegisterPage/RegisterPage";
 export { default as MakeReservation } from "./MakeReservation/MakeReservation";
 export { default as Profile } from "./Profile/Profile";
 export { default as ZoneAdmin } from "./Admin/ZoneAdmin";
+export { default as RequestResetPassword } from "./RequestResetPassword/RequestResetPassword";
+export { default as ResetPassword } from "./ResetPassword/ResetPassword";

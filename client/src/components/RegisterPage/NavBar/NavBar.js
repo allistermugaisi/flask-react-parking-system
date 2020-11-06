@@ -1,68 +1,77 @@
-import React, { useState } from "react";
+import React, { useState, Fragment } from "react";
 import { Link } from "react-router-dom";
-import styles from "./NavBar.module.css";
+import { useSelector } from "react-redux";
+import { Button } from "./Button";
+import UserLoggedInButton from "../../Landing/Header/UserLoggedInButton";
+import "./NavBar.css";
 import logo from "../../assets/logo.png";
-import {
-  Container,
-  Nav,
-  Navbar,
-  NavbarBrand,
-  NavbarToggler,
-  Collapse,
-  NavItem,
-} from "reactstrap";
 
 const NavBar = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [click, setClick] = useState(false);
 
-  const toggle = () => setIsOpen(!isOpen);
+  let isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+
+  const handleClick = () => {
+    setClick(!click);
+  };
+
+  const closeMobileMenu = () => setClick(false);
   return (
-    <React.Fragment>
-      <Navbar
-        expand="sm"
-        className="mb-5 "
-        style={{ backgroundColor: "#000000" }}
-      >
-        <Container>
-          <img src={logo} alt="logo" className={styles.logo} />
-          <NavbarBrand className={styles.brand} href="/">
-            RESERVATION
-          </NavbarBrand>
-          <NavbarToggler className={styles.navbarToggler} onClick={toggle} />
-          <Collapse isOpen={isOpen} navbar className={styles.collapse}>
-            <Nav className="ml-auto " navbar style={{ paddingRight: "30px" }}>
-              <NavItem>
-                <Link className={styles.link} to="/">
+    <Fragment>
+      <nav className="navbar mb-5">
+        <img src={logo} alt="logo" className="navbar-brand" />
+        <Link to="#" className="navbar-logo" onClick={closeMobileMenu}>
+          RESERVATION
+        </Link>
+        <div className="menu-icon" onClick={handleClick}>
+          <i className={click ? "fas fa-times" : "fas fa-bars"} />
+        </div>
+        <ul className={click ? "nav-menu active " : "nav-menu"}>
+          {isAuthenticated ? (
+            <Fragment>
+              <li className="nav-item">
+                <Link to="/" className="nav-links" onClick={closeMobileMenu}>
                   Home
                 </Link>
-              </NavItem>
-              <NavItem>
-                <Link className={styles.link} to="#">
+              </li>
+              <li className="nav-item">
+                <Link to="/" className="nav-links" onClick={closeMobileMenu}>
                   Zones
                 </Link>
-              </NavItem>
-              <NavItem>
-                <Link className={styles.link} to="#">
+              </li>
+              <li className="nav-item">
+                <Link
+                  to="/about"
+                  className="nav-links"
+                  onClick={closeMobileMenu}
+                >
                   About
                 </Link>
-              </NavItem>
-            </Nav>
-            <Nav className="ml-auto" navbar>
-              <NavItem>
-                <Link className={styles.link} to="/login">
-                  Login
-                </Link>
-              </NavItem>
-              <NavItem>
-                <Link className={styles.link} to="/register">
-                  Register
-                </Link>
-              </NavItem>
-            </Nav>
-          </Collapse>
-        </Container>
-      </Navbar>
-    </React.Fragment>
+              </li>
+            </Fragment>
+          ) : null}
+          <li className="nav-item">
+            <Link
+              to="/login"
+              className="nav-links-mobile"
+              onClick={closeMobileMenu}
+            >
+              Login
+            </Link>
+          </li>
+          <li className="nav-item">
+            <Link
+              to="/register"
+              className="nav-links-mobile"
+              onClick={closeMobileMenu}
+            >
+              Register
+            </Link>
+          </li>
+        </ul>
+        {isAuthenticated ? <UserLoggedInButton /> : <Button />}
+      </nav>
+    </Fragment>
   );
 };
 
