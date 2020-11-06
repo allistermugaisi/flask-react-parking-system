@@ -5,6 +5,7 @@ import NavBar from "../RegisterPage/NavBar/NavBar";
 import Footer from "../RegisterPage/Footer/Footer";
 import blueP from "../assets/blueP.png";
 import redP from "../assets/redP.png";
+import io from "socket.io-client";
 import "./Zone.css";
 // import MakeReservation from "../MakeReservation/MakeReservation";
 
@@ -109,6 +110,12 @@ const ZoneA = ({ history }) => {
       return parkingImages.available;
     }
   }
+
+  const socket = io.connect("http://127.0.0.1:5000", {
+  transports: ["websocket"],
+  rejectUnauthorized: false,
+  secure: true,
+});
 
   // function disableActiveImage(index){
   //   if(slotState.slots[index].toggled){

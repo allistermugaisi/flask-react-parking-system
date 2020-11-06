@@ -6,7 +6,6 @@ import {
   LoginPage,
   RegisterPage,
   MakeReservation,
-  Profile,
   ZoneAdmin,
   RequestResetPassword,
   ResetPassword,
@@ -54,15 +53,14 @@ function App() {
             component={Auth(RequestResetPassword, false)}
           />
           <Route
-            path="/reset_password:token"
+            path="/reset_password/:id"
             component={Auth(ResetPassword, false)}
           />
           <Route path="/reservation" component={Auth(MakeReservation, true)} />
-          <Route path="/profile" component={Profile} />
           <Route path="/zones/zone-a" component={ZoneA} />
           <Route path="/zones/zone-b" component={ZoneB} />
           <Route path="/zones/zone-c" component={ZoneC} />
-          <Route path="/zones/admin" component={ZoneAdmin} />
+          <Route path="/zones/admin" component={Auth(ZoneAdmin,true)} />
           <Route path="/admin/dashboard" component={dashboard} />
           <Route path="/admin/reservations" component={Reservation} />
           <Route path="/admin/help" component={Help} />
@@ -80,6 +78,15 @@ function App() {
           <Route path="/user-profile/payments" component={Payments} />
           <Route path="/user-profile/settings" component={Settings} />
           <Route path="/user-profile/help" component={userHelp} />
+          <Route
+            path="/payment"
+            component={() => {
+              global.window &&
+                (global.window.location.href =
+                  "https://ravesandbox.flutterwave.com/pay/x46g8vnqpvgh");
+              return null;
+            }}
+          />
         </Switch>
       </div>
     </Suspense>

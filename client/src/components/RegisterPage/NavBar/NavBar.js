@@ -2,6 +2,7 @@ import React, { useState, Fragment } from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Button } from "./Button";
+import UserLoggedInButton from "../../Landing/Header/UserLoggedInButton";
 import "./NavBar.css";
 import logo from "../../assets/logo.png";
 
@@ -68,7 +69,7 @@ const NavBar = () => {
             </Link>
           </li>
         </ul>
-        <Button />
+        {isAuthenticated ? <UserLoggedInButton /> : <Button />}
       </nav>
     </Fragment>
   );

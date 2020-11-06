@@ -3,6 +3,7 @@ import {
   CLEAR_ERRORS,
   LOGIN_FAIL,
   REGISTER_FAIL,
+  SLOT_FAIL,
   AUTH_ERROR,
 } from "./types";
 
@@ -38,6 +39,13 @@ export const loginFail = () => {
 export const registerFail = () => {
   return {
     type: REGISTER_FAIL,
+  };
+};
+
+// Slot Fail
+export const slotFail = () => {
+  return {
+    type: SLOT_FAIL,
   };
 };
 

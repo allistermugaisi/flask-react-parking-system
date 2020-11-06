@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, json, make_response, url_for, redirect
+from flask import Flask, jsonify, request, json, make_response, url_for, redirect, abort
 import datetime
 import uuid
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -9,19 +9,17 @@ from flask_mail import Message
 import jwt
 from functools import wraps
 from flask_socketio import emit
-from app_backend.models import (Users, Reservations, Zones,
-                                UsersSchema, ZonesSchema, ReservationsSchema)
+from rave_python import Rave, RaveExceptions, Misc
+from app_backend.models import (Users, Reservations, Slots,
+                                UsersSchema, SlotsSchema, ReservationsSchema)
 
 # Exceptions for sqlachemy
 from sqlalchemy.exc import IntegrityError
 
 
-# create an instance for the ZonesSchema i.e. zone_schema is for single data, zones_schema is when data is more than one
-zone_schema = ZonesSchema()
-zones_schema = ZonesSchema(many=True)
-
-# reservation = ReservationsSchema()
-# reservations = ReservationsSchema(many=True)
+# create an instance for the SlotsSchema i.e. slot_schema is for single data, slots_schema is when data is more than one
+slot_schema = SlotsSchema()
+slots_schema = SlotsSchema(many=True)
 
 
 # auth middleware to enable private routes
@@ -44,7 +42,7 @@ def token_required(f):
             current_user = Users.query.filter_by(
                 public_id=data['public_id']).first()
         except:
-            return jsonify({'message': 'Token is not valid!'}), 401
+            return jsonify({'message': 'Token is not valid!'}), 403
         return f(current_user, *args, **kwargs)
 
     return decorated
@@ -59,7 +57,7 @@ def token_required(f):
 def getAuthUsers(current_user):
 
     if not current_user.admin:
-        return jsonify({'message': 'None admin users cannot perform that function!'})
+        return jsonify({'message': 'None admin users cannot perform that function!'}), 403
 
     users = Users.query.all()
 
@@ -75,7 +73,7 @@ def getAuthUsers(current_user):
 
         output.append(user_data)
 
-    return jsonify({'users': output})
+    return jsonify({'users': output}), 201
 
     # @route GET api/auth/user
     # @desc GET current_user access by token
@@ -88,7 +86,7 @@ def getAuthUser(current_user):
 
     user = Users.query.filter_by(public_id=current_user.public_id).first()
     if not user:
-        return jsonify({'message': 'No user found!'})
+        return jsonify({'message': 'No user found!'}), 401
 
     user_data = {}
     user_data['public_id'] = user.public_id
@@ -97,7 +95,7 @@ def getAuthUser(current_user):
     user_data['phone_number'] = user.phone_number
     user_data['admin'] = user.admin
 
-    return jsonify({'user': user_data})
+    return jsonify({'user': user_data}), 201
 
     # @route GET api/user
     # @desc GET current_user data by id
@@ -109,11 +107,11 @@ def getAuthUser(current_user):
 def get_one_user(current_user, public_id):
 
     if not current_user.admin:
-        return jsonify({'message': 'None admin users cannot perform that function!'})
+        return jsonify({'message': 'None admin users cannot perform that function!'}), 403
 
     user = Users.query.filter_by(public_id=public_id).first()
     if not user:
-        return jsonify({'message': 'No user found!'})
+        return jsonify({'message': 'No user found!'}), 401
 
     user_data = {}
     user_data['public_id'] = user.public_id
@@ -122,7 +120,7 @@ def get_one_user(current_user, public_id):
     user_data['phone_number'] = user.phone_number
     user_data['admin'] = user.admin
 
-    return jsonify({'user': user_data})
+    return jsonify({'user': user_data}), 201
 
     # @route POST api/users
     # @desc POST create new user
@@ -161,11 +159,11 @@ def create_user():
         db.session.add(new_user)
         db.session.commit()
 
-        return jsonify({'message': 'New user created!'})
+        return jsonify({'message': 'New user created!'}), 201
     except IntegrityError:
         # the rollback func reverts the changes made to the db ( so if an error happens after we commited changes they will be reverted )
         db.session.rollback()
-        return jsonify({'msg': 'User already exists'}), 401
+        return jsonify({'msg': 'User already exists'}), 403
 
         # @route PUT api/user
         # @desc PUT promote user to an admin
@@ -176,16 +174,16 @@ def create_user():
 @token_required
 def promote_user(current_user, public_id):
     if not current_user.admin:
-        return jsonify({'message': 'None admin users cannot perform that function!'})
+        return jsonify({'message': 'None admin users cannot perform that function!'}), 403
 
     user = Users.query.filter_by(public_id=public_id).first()
     if not user:
-        return jsonify({'message': 'No user found!'})
+        return jsonify({'message': 'No user found!'}), 401
 
     user.admin = True
     db.session.commit()
 
-    return jsonify({'message': 'The user has been promoted to an admin!'})
+    return jsonify({'message': 'The user has been promoted to an admin!'}), 201
 
     # @route DELETE api/user
     # @desc DELETE remove user
@@ -196,16 +194,16 @@ def promote_user(current_user, public_id):
 @token_required
 def delete_user(current_user, public_id):
     if not current_user.admin:
-        return jsonify({'message': 'None admin users cannot perform that function!'})
+        return jsonify({'message': 'None admin users cannot perform that function!'}), 403
 
     user = Users.query.filter_by(public_id=public_id).first()
     if not user:
-        return jsonify({'message': 'No user found!'})
+        return jsonify({'message': 'No user found!'}), 401
 
     db.session.delete(user)
     db.session.commit()
 
-    return jsonify({'message': 'The user has been deleted!'})
+    return jsonify({'message': 'The user has been deleted!'}), 201
 
     # @route POST api/auth
     # @desc POST Authenticate user
@@ -218,20 +216,20 @@ def authUser():
 
     # Simple validation
     if not data or not data['email'] or not data['password']:
-        return jsonify({'message': 'Please enter all fields!'}), 403
+        return jsonify({'message': 'Please enter all fields!'}), 401
 
     # Check for existing user
     user = Users.query.filter_by(email=data['email']).first()
 
     if not user:
-        return jsonify({'message': 'User does not exist!'}), 401
+        return jsonify({'message': 'User does not exist!'}), 403
 
     # Validate password
     if check_password_hash(user.password, data['password']):
         token = jwt.encode({'public_id': user.public_id, 'exp': datetime.datetime.utcnow(
         ) + datetime.timedelta(minutes=1080)}, app.config['JWT_SECRET_KEY'])
-        return jsonify({'token': token.decode('UTF-8')})
-    return jsonify({'message': 'Invalid Credentials!'}), 401
+        return jsonify({'token': token.decode('UTF-8')}), 201
+    return jsonify({'message': 'Invalid Credentials!'}), 403
 
     # @route GET/POST api/reset_password
     # @desc reset user password
@@ -243,9 +241,17 @@ def send_reset_email(user):
     msg = Message('Password Reset Request',
                   sender='noreply@demo.com', recipients=[user.email])
 
+    # response = redirect('http://localhost:3000/reset_password')
+    # response.headers = {'authorization': token}
+
+    # print(response)
+
+    # return response
+
+
 # {url_for('reset_token', token=token, _external=True)}
     msg.html = f'''To reset your password, visit the following link:
-{redirect('http://localhost:3000/reset_password/:token',token)}
+{url_for('reset_token', token=token, _external=True)}
 
 If you did not make this request then simply ignore this email and no changes will be made.
 '''
@@ -314,7 +320,7 @@ def get_all_reservations(current_user):
         reservation_data['complete'] = reservation.complete
         output.append(reservation_data)
 
-    return jsonify({'reservations': output})
+    return jsonify({'reservations': output}), 201
 
     # @route GET api/reservation/<reservation_id>
     # @desc GET get one reservation
@@ -328,14 +334,14 @@ def get_one_reservation(current_user, reservation_id):
         id=reservation_id, user_id=current_user.id).first()
 
     if not reservation:
-        return jsonify({'message': 'No reservation found!'})
+        return jsonify({'message': 'No reservation found!'}), 403
         reservation_data = {}
         reservation_data['id'] = todo.id
         reservation_data['entry_date'] = reservation.entry_date
         reservation_data['exit_date'] = reservation.exit_date
         reservation_data['complete'] = reservation.complete
 
-    return jsonify(reservation_data)
+    return jsonify(reservation_data), 201
 
     # @route POST api/reservation
     # @desc POST create reservation
@@ -347,12 +353,25 @@ def get_one_reservation(current_user, reservation_id):
 def create_reservation(current_user):
     data = request.get_json()
 
+    # Simple validation
+    if not data or not data['slot_number'] or not data['zone'] or not data['cost'] or not data['reserved_date'] or not data['reserved_slot']:
+        return jsonify({'msg': 'Please enter all fields!'}), 401
+
+    # Check for existing reservation
+    reservation_exist = Reservations.query.filter_by(
+        reserved_slot=data['reserved_slot'], user_id=current_user.id).first()
+
+    if reservation_exist:
+        return jsonify({'message': 'Reservation already exits'}), 403
+
     new_reservation = Reservations(public_reservation_id=str(uuid.uuid4()),
-                                   entry_date=data['entry_date'], exit_date=data['exit_date'], complete=False, user_id=current_user.id)
+                                   slot_number=data['slot_number'],
+                                   reserved_date=data['reserved_date'], reserved_slot=data['reserved_slot'],
+                                   cost=data['cost'], zone=data['zone'], complete=False, user_id=current_user.id)
     db.session.add(new_reservation)
     db.session.commit()
 
-    return jsonify({'message': "Reservation created!"})
+    return jsonify({'message': "Reservation created!"}), 201
 
     # @route PUT api/reservation/<reservation_id>
     # @desc PUT update one reservation
@@ -366,12 +385,12 @@ def complete_reservation(current_user, reservation_id):
         id=reservation_id, user_id=current_user.id).first()
 
     if not reservation:
-        return jsonify({'message': 'No reservation found!'})
+        return jsonify({'message': 'No reservation found!'}), 403
 
     reservation.complete = True
     db.session.commit()
 
-    return jsonify({'message': 'Reservation item has been completed!'})
+    return jsonify({'message': 'Slot has been reserved successfully!'}), 201
 
     # @route DELETE api/reservation/<reservation_id>
     # @desc DELETE  reservation
@@ -385,101 +404,112 @@ def delete_reservation(current_user, reservation_id):
         id=reservation_id, user_id=current_user.id).first()
 
     if not reservation:
-        return jsonify({'message': 'No reservation found!'})
+        return jsonify({'message': 'No reservation found!'}), 403
 
     db.session.delete(reservation)
     db.session.commit()
 
-    return jsonify({'message': 'Reservation item deleted!'})
+    return jsonify({'message': 'Reservation item deleted!'}), 201
+
+    # @route POST api/slots
+    # @desc POST slot
+    # @access Private
 
 
-# @route /
-# @desc
-# @access Public
+@app.route('/api/slots', methods=['POST'])
+@token_required
+def addSlots(current_user):
+    if not current_user.admin:
+        return jsonify({'message': 'None admin users cannot perform that function!'}), 403
 
+    data = request.get_json()
 
-@app.route('/', methods=['GET'])
-def dashboard():
-    return {
-        "user_id": 1,
-        "title": "Flask react application",
-        "completed": False
-    }
+    # Simple validation
+    if not data or not data['slot_name'] or not data['zone']:
+        return jsonify({'msg': 'Please enter all fields!'}), 401
 
+    # Check for existing slot
+    slot_exist = Slots.query.filter_by(
+        slot_name=data['slot_name'], zone=data['zone']).first()
 
-# @route == description == add zones
-@app.route('/zones/admin', methods=['POST'])
-def zonesAddAdmin():
-    capacity = request.get_json()['capacity']
-    slot = request.get_json()['slot']
-    zone = request.get_json()['zone']
-    info = ""
+    if slot_exist:
+        return jsonify({'message': 'slot already exists'}), 403
 
-    if slot <= capacity:
+    newSlot = Slots(slot_name=data['slot_name'], zone=data['zone'])
 
-        zones = Zones(capacity=capacity, slot=slot, zone=zone)
-
-        db.session.add(zones)
-        db.session.commit()
-
-        info = {
-            "capacity": capacity,
-            "slot": slot,
-            "zone": zone
-        }
-        return {'info': info}, 201
-    else:
-        info = "Number of slots cannot exceed capacity"
-        return {'info_exceed': info}, 403
-
-
-# @route == description == get zones
-
-
-@app.route('/zones/admin', methods=['GET'])
-def zonesGetAdmin():
-
-    # order data in descending order, then query the first data which will be the latest entered data by the user_admin
-    all_zones = Zones.query.order_by(Zones.id.desc()).first()
-    # the instance === zone_schema === references when the data being queried is one. If more than one then change it to === zones_schema ===
-    result = zone_schema.dump(all_zones)
-    return jsonify({'zones': result}), 200
-
-# @route == description == update zones
-
-
-@app.route('/zones/admin/<id>', methods=['PUT'])
-def zonesUpdateAdmin(id):
-    zoneID = Zones.query.get(id)
-
-    capacity = request.get_json()['capacity']
-    slot = request.get_json()['slot']
-    zone = request.get_json()['zone']
-    info = ""
-
-    if slot <= capacity:
-
-        zoneID.capacity = capacity
-        zoneID.slot = slot
-        zoneID.zone = zone
-
-        db.session.commit()
-
-        return zone_schema.jsonify(zoneID), 201
-    else:
-        info = "Number of slots cannot exceed capacity"
-        return {'info_exceed': info}, 403
-
-# @route == description == delete zones
-
-
-@app.route('/zones/admin/<id>', methods=['DELETE'])
-def zonesDeleteAdmin(id):
-    zone = Zones.query.get(id)
-    db.session.delete(zone)
+    db.session.add(newSlot)
     db.session.commit()
 
-    return zone_schema.jsonify(zone)
+    return jsonify({'message': "slot created!"}), 201
+
+    # @route GET api/slots
+    # @desc GET slots
+    # @access Private
+
+
+@app.route('/api/slots', methods=['GET'])
+@token_required
+def get_all_slots(current_user):
+    if not current_user.admin:
+        return jsonify({'message': 'None admin users cannot perform that function!'}), 403
+
+    slots = Slots.query.all()
+
+    # the instance === slots_schema === references when the data being queried is one. If more than one then change it to === slots_schema ===
+    output = slots_schema.dump(slots)
+    return jsonify({'result': output}), 201
+
+    # @route DELETE api/slots
+    # @desc DELETE slot
+    # @access Private
+
+
+@app.route('/api/slots/<slot_id>', methods=['DELETE'])
+@token_required
+def deleteSlots(current_user, slot_id):
+    if not current_user.admin:
+        return jsonify({'message': 'None admin users cannot perform that function!'}), 403
+
+    # Check for existing slot
+    slot_exist = Slots.query.filter_by(id=slot_id).first()
+
+    if not slot_exist:
+        return jsonify({'message': 'No slot found!'}), 403
+
+    db.session.delete(slot_exist)
+    db.session.commit()
+
+    return jsonify({'message': 'Slot has been deleted!'}), 201
+
+    # @route PUT api/slots
+    # @desc PUT slot
+    # @access Private
+
+
+@app.route('/api/slots/<slot_id>', methods=['PUT'])
+@token_required
+def updateSlots(current_user, slot_id):
+    if not current_user.admin:
+        return jsonify({'message': 'None admin users cannot perform that function!'}), 403
+
+    data = request.get_json()
+
+    # Simple validation
+    if not data or not data['slot_name'] or not data['zone']:
+        return jsonify({'msg': 'Please enter all fields!'}), 401
+
+    # Check for existing slot
+    slot_exist = Slots.query.filter_by(id=slot_id).first()
+
+    if not slot_exist:
+        return jsonify({'message': 'No slot found!'}), 403
+
+    slot_exist.slot_name = data['slot_name']
+    slot_exist.zone = data['zone']
+    db.session.commit()
+
+    return jsonify({'message': 'Slot has been updated!'}), 201
+
 
 # connection to socket io
 
@@ -502,3 +532,91 @@ def test_disconnect():
 # def timer(data):
 #     reservation
 #     emit('This slot is reserved', data, broadcast=True)
+
+
+# Function to create a temporary access token for the webhook url
+# The function stores IP addresses (key) and the time they validated (value).
+# In order for an IP to become validated, they need to send a GET request with a parameter verif_hash  equal to our webhooks token.
+# Once an IP is registered the webhook will accept POSTs from it, the same as previously.
+def temp_token():
+    import binascii
+    temp_token = binascii.hexlify(os.urandom(24))
+    return temp_token.decode('utf-8')
+
+
+CLIENT_AUTH_TIMEOUT = 24  # in Hours
+
+# Since we only store the authorised IP addresses in a dictionary, they're lost whenever the application closes. You could store these into a file format, or even a database.
+# Flask-SQLAlchemy makes or simplifies using databases with Flask!
+authorised_clients = {}
+
+# @route POST/GET /webhook
+# @desc POST/GET === Primarily we use webhooks to share information about an event that happened on your account with you. These events could range from a successful transaction to a failed transaction or even a new debit on your account. ===
+# @access Private
+
+
+@app.route('/webhook', methods=['GET', 'POST'])
+def webhook():
+    from datetime import datetime, timedelta
+    # WEBHOOK_VERIFY_TOKEN = app.config['WEBHOOK_VERIFY_TOKEN']
+    if 'verif-hash' in request.headers:
+        verify_token = request.headers['verif-hash']
+        if verify_token == app.config['WEBHOOK_VERIFY_TOKEN']:
+            authorised_clients[request.remote_addr] = datetime.now()
+            return jsonify({'status': 'success'}), 200
+        else:
+            return jsonify({'status': 'bad token'}), 401
+
+    elif request.method == 'POST':
+        client = request.remote_addr
+        if client in authorised_clients:
+            if datetime.now() - authorised_clients.get(client) > timedelta(hours=CLIENT_AUTH_TIMEOUT):
+                authorised_clients.pop(client)
+                return jsonify({'status': 'authorisation timeout'}), 401
+            else:
+                print(request.json)
+                return jsonify({'status': 'success'}), 200
+        else:
+            return jsonify({'status': 'not authorised'}), 401
+
+    else:
+        abort(400)
+
+    # @route POST /payment
+    # @desc POST Mpesa Payment API via Flutterwave
+    # @access Private
+
+
+@app.route('/payment', methods=['POST'])
+def payment():
+    data = request.get_json()
+
+    rave = Rave(app.config['MPESA_PUBLIC_KEY'],
+                app.config['MPESA_PRIVATE_KEY'], usingEnv=False)
+
+    # mobile payload
+    payload = {
+        "amount": data["amount"],
+        "phonenumber": data["phonenumber"],
+        "email": data["email"],
+        "narration": data["narration"],
+        "fullname": data["fullname"],
+        "IP": data["IP"]
+    }
+    print(payload)
+
+    try:
+        res = rave.Mpesa.charge(payload)
+        res = rave.Mpesa.verify(res["txRef"])
+        print(res)
+        return jsonify({'status': 'payment successful'}), 200
+
+    except RaveExceptions.TransactionChargeError as e:
+        print(e.err["errMsg"])
+        print(e.err["flwRef"])
+        return jsonify({'status': 'Transaction not successful'}), 403
+
+    except RaveExceptions.TransactionVerificationError as e:
+        print(e.err["errMsg"])
+        print(e.err["txRef"])
+        return jsonify({'status': 'Transaction verification failed'}), 403

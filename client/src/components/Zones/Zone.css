@@ -30,37 +30,27 @@
   padding: 0 0.2em;
   text-decoration: none;
 }
-
-.timer-container {
-  color: #fff;
-  width: 100vw;
-  height: 100vh;
+#sdate {
+  cursor: pointer;
 }
-.timer {
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  flex: column;
-  align-items: center;
-  justify-content: center;
+.table th {
+  text-align: center;
+  cursor: default;
 }
-.timer div:first-child {
+.table td {
+  border: 1px solid #e8f2fd;
+  cursor: pointer;
   text-align: center;
 }
-h2 {
-  font-weight: 600;
-  margin-bottom: 0.5em;
+.table td:hover {
+  background-color: #2680eb;
 }
-.timer div:last-child {
-  border: solid #fff;
-  border-radius: 3px;
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  padding: 3em;
-  margin-top: 3em;
-  text-align: center;
+#td-slots {
+  cursor: default;
+  border: none;
 }
-.timer div:last-child span {
-  font-size: 3em;
+#td-slots:hover {
+  background-color: #fff;
 }
 .noWrap {
   white-space: nowrap;
@@ -70,4 +60,18 @@ h2 {
 }
 #unavailable {
   background-color: #f1e2d4;
+}
+.slot {
+  margin: 10px;
+  transition: background-color 0.1 ease-in-out;
+}
+.inactive {
+  background-color: #f39c12;
+}
+.active {
+  background-color: #3498db;
+}
+.slot-loading {
+  justify-content: center;
+  display: flex;
 }

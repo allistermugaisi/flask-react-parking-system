@@ -5,7 +5,7 @@ from app_backend import app, db, ma
 
 class Users(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    admin = db.Column(db.Boolean)
+    admin = db.Column(db.Boolean, nullable=False)
     public_id = db.Column(db.String(50), unique=True)
     username = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -43,32 +43,35 @@ class UsersSchema(ma.Schema):
 class Reservations(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     public_reservation_id = db.Column(db.String(50), unique=True)
-    entry_date = db.Column(db.String, nullable=False)
-    exit_date = db.Column(db.String, nullable=False)
-    complete = db.Column(db.Boolean)
+    reserved_date = db.Column(db.String, nullable=False)
+    complete = db.Column(db.Boolean, nullable=False)
+    slot_number = db.Column(db.String, nullable=False)
+    zone = db.Column(db.String(70), nullable=False)
+    cost = db.Column(db.Integer, nullable=False)
+    reserved_slot = db.Column(db.String(70), nullable=False)
     date_created = db.Column(
         db.DateTime, nullable=False, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
     def __repr__(self):
-        return f"Reservations('{self.public_reservation_id}','{self.entry_date}','{self.exit_date}','{self.date_created}','{self.complete}')"
+        return f"Reservations('{self.public_reservation_id}','{self.reserved_date}','{self.zone}','{self.cost}','{self.reserved_slot}','{self.date_created}','{self.complete}','{self.user_id}')"
 
 
 class ReservationsSchema(ma.Schema):
     class Meta:
-        fields = ('entry_date', 'exit_date', 'complete', 'date_created')
+        fields = ('public_reservation_id', 'reserved_date', 'zone',
+                  'cost', 'reserved_slot', 'complete', 'date_created')
 
 
-class Zones(db.Model):
+class Slots(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     slot_name = db.Column(db.String(70), nullable=False)
     zone = db.Column(db.String(70), nullable=False)
-    available = db.Column(db.Boolean)
 
     def __repr__(self):
-        return f"Zones('{self.available}','{self.slot_name}','{self.zone}')"
+        return f"Slots('{self.id}','{self.slot_name}','{self.zone}')"
 
 
-class ZonesSchema(ma.Schema):
+class SlotsSchema(ma.Schema):
     class Meta:
-        fields = ('available', 'slot_name', 'zone')
+        fields = ('id', 'slot_name', 'zone')

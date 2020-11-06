@@ -10,3 +10,6 @@
   padding-left: 2rem;
   width: 150px;
 }
+#login-btn button:hover {
+  transform: scale(0.98);
+}

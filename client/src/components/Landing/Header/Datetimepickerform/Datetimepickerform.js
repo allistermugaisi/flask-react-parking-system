@@ -5,11 +5,8 @@ function Datetimepickerform() {
   return (
     <div className="container shadow-sm bg-white" id="halfway-button">
       <div className="row">
-        <div className="col-sm-12 col-md-4" id="input-color">
-          <label htmlFor="entry" style={{ paddingLeft: "15px" }}>
-            Entry date & time
-          </label>
-          <div className="input-group" id="datetimepicker">
+        <div className="col-sm-12 col-md-2" id="input-color">
+          <div className="input-group" id="display-none">
             <input
               type="text"
               placeholder="26.03.2020  12:38"
@@ -24,9 +21,9 @@ function Datetimepickerform() {
           </div>
         </div>
 
-        <div className="col-sm-12 col-md-4" id="input-color">
-          <label htmlFor="exit" style={{ paddingLeft: "15px" }}>
-            Exit date & time
+        <div className="col-sm-12 col-md-5" id="input-color">
+          <label htmlFor="exit" style={{ paddingLeft: "75px" }}>
+            Enter date 
           </label>
           <div className="input-group" id="datetimepicker">
             <input

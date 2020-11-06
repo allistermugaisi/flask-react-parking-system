@@ -1,111 +1,77 @@
-import React, { useState } from "react";
+import React from "react";
+import {useDispatch } from "react-redux";
 import { withRouter } from "react-router-dom";
 import useButtonLoader from "../utils/useButtonLoader";
+import { useForm } from "react-hook-form";
 import { useSpring, animated } from "react-spring";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import {addSlot, slotLoading} from "../../actions/slotActions"
+import { returnErrors, clearErrors, slotFail } from "../../actions/errorActions";
 import NavBar from "../RegisterPage/NavBar/NavBar";
 import Footer from "../RegisterPage/Footer/Footer";
-import { zoneFunc } from "../utils/AdminFunctions";
-import { Input } from "reactstrap";
 import "./ZoneAdmin.css";
 
 toast.configure();
 const ZoneAdmin = ({ history }) => {
-  const [Value, setValue] = useState({ capacity: "", slot: "", zone: "" });
-  const [Errors] = useState({ capacity: "", slot: "", zone: "" });
-  const [Validity] = useState({ capacity: false, slot: false, zone: false });
-
+  const dispatch = useDispatch();
+  
   const [zoneButtonElement, setButtonLoading] = useButtonLoader(
     "Submit",
     "Loading"
   );
 
-  const handleChange = ({ target }) => {
-    Value[target.name] = target.value;
-    setValue({ ...Value, Value });
-    handleValidation(target);
-  };
+  const { register, handleSubmit, errors } = useForm();
 
-  const handleValidation = (target) => {
-    const { name, value } = target;
-    const isCapacity = name === "capacity";
-    const isSlot = name === "slot";
-    const numberTest = /^[0-9]+$/;
-
-    Validity[name] = value.length > 0;
-    Errors[name] = Validity[name]
-      ? ""
-      : `${name} is required and cannot be empty`;
-
-    if (Validity[name]) {
-      if (Validity[name]) {
-        if (isCapacity) {
-          Validity[name] = numberTest.test(value);
-          Errors[name] = Validity[name] ? "" : `${name} should be a number`;
-        }
-      }
-      if (Validity[name]) {
-        if (isSlot) {
-          Validity[name] = numberTest.test(value);
-          Errors[name] = Validity[name] ? "" : `${name} should be a number`;
-        }
-      }
-    }
-  };
-
-  const clearState = () => {
-    setValue({ capacity: "", slot: "", zone: "" });
-  };
-
-  const handleZoneSubmit = (event) => {
-    event.preventDefault();
-
-    if (Object.values(Validity).every(Boolean)) {
-      setButtonLoading(true);
-
-      const newZone = {
-        capacity: Value.capacity,
-        slot: Value.slot,
-        zone: Value.zone,
-      };
-
-      zoneFunc(newZone).then((response) => {
-        //console.log(response.info_exceed);
-
-        if (response.info_exceed) {
+  const onSubmit = (data, e) => {
+    e.preventDefault();
+    setButtonLoading(true);
+    
+    // Create slot object
+    const newSlot = {
+      slot_name: data.slot_name,
+      zone:data.zone
+    };
+    
+    dispatch(slotLoading())
+    // Attempt to create slot
+    dispatch(addSlot(newSlot))
+      .then((response) => {
+        setButtonLoading(false);
+        if (response.payload.message) {
           history.push("/zones/admin");
-          toast.error("Number of slots cannot exceed capacity!", {
+          toast.success("Slot created!", {
             position: toast.POSITION.TOP_CENTER,
             autoClose: 3000,
           });
-        } else if (response.info) {
-          history.push("/");
-          toast.success("Parking zone successfully created!", {
+          e.target.reset();
+          dispatch(clearErrors());
+        }
+       
+      })
+      .catch((error) => {
+       
+        dispatch(
+          returnErrors(
+            error.response.data,
+            error.response.status,
+            "SLOT_FAIL"
+          )
+        );
+        dispatch(slotFail());
+
+        if (error.response.data) {
+          history.push("/zones/admin");
+          toast.error("Slot already exists!", {
             position: toast.POSITION.TOP_CENTER,
             autoClose: 3000,
           });
-        } else {
-          history.push("/zones/admin");
         }
-
         setButtonLoading(false);
       });
-      clearState();
-    } else {
-      for (let key in Value) {
-        let target = {
-          name: key,
-          value: Value[key],
-        };
-        handleValidation(target);
-      }
-    }
-  };
+};
 
-  const handleZoneEdit = () => {};
-
-  const handleZoneDelete = () => {};
+  
 
   const props = useSpring({
     from: {
@@ -122,7 +88,7 @@ const ZoneAdmin = ({ history }) => {
       <NavBar />
 
       <animated.div className="container" id="border" style={props}>
-        <h3 id="register">Manage Parking Zones </h3>
+        <h3 id="register">Add Parking Slots </h3>
         <p style={{ color: "#2680eb" }}>Parking Spaces</p>
       </animated.div>
       <div className="container mb-3">
@@ -136,99 +102,56 @@ const ZoneAdmin = ({ history }) => {
       <br />
       <br />
       <div className="container">
-        <div className="row">
+      <form onSubmit={handleSubmit(onSubmit)}>
           <div className="col-sm-12 col-md-3">
-            <label htmlFor="capacity" style={{ paddingLeft: "10px" }}>
-              Parking Capacity
-            </label>
-            <div className="input-group" id="input-color">
-              <input
-                name="capacity"
-                className={`form-control ${
-                  Errors.capacity ? "is-invalid" : ""
-                }`}
-                placeholder="e.g. 200"
-                value={Value.capacity}
-                onChange={handleChange}
-              />
-              <span className="invalid-feedback">{Errors.capacity}</span>
+              <div className="input-group" id="input-color">
+                <input
+                  type="text"
+                  className={`form-control ${
+                    errors.slot_name ? "is-invalid" : ""
+                  }`}
+                  placeholder="Slot name"
+                  name="slot_name"
+                  ref={register({
+                    required: true,
+                  })}
+                />
+              </div>
+              {errors.slot_name && errors.slot_name.type === "required" && (
+                <span
+                  style={{
+                    fontSize: "13px",
+                    fontWeight: "500",
+                    color: "#bf1650",
+                  }}
+                >
+                  Slot name is required!
+                </span>
+              )}
             </div>
-          </div>
-        </div>
-      </div>
-      <br />
-      <div className="container">
-        <div className="row">
-          <div className="col-sm-12 col-md-3">
-            <label htmlFor="slot" style={{ paddingLeft: "10px" }}>
-              No. of slots
-            </label>
-            <div className="input-group" id="input-color">
-              <input
-                name="slot"
-                className={`form-control ${Errors.slot ? "is-invalid" : ""}`}
-                placeholder="e.g. 50"
-                value={Value.slot}
-                onChange={handleChange}
-              />
-              <span className="invalid-feedback">{Errors.slot}</span>
+            &nbsp;
+            <div className="col-sm-12 col-md-3" >
+              <div id="zone-input">
+              <select className={`form-control ${
+                    errors.zone ? "is-invalid" : ""
+                  }`} name="zone" ref={register({ required: true })}>
+                <option value="zone A">zone A</option>
+                <option value="zone B">zone B</option>
+                <option value="zone C">zone C</option>
+              </select>
+             </div>
             </div>
+            <br/>
+            <div id="zone-btn">
+            <button
+              className="btn btn-md btn-primary m-0"
+              type="submit"
+              ref={zoneButtonElement}
+            >
+              Submit
+            </button>
           </div>
-        </div>
-      </div>
-      <br />
-      <div className="container">
-        <div className="row">
-          <div className="col-sm-12 col-md-3">
-            <label htmlFor="zone" style={{ paddingLeft: "10px" }}>
-              Parking Area
-            </label>
-            <div className="input-group" id="input-color">
-              <Input
-                id="zone-input"
-                name="zone"
-                type="select"
-                className={`form-control ${Errors.zone ? "is-invalid" : ""}`}
-                value={Value.zone}
-                onChange={handleChange}
-              >
-                <option>zone A</option>
-                <option>zone B</option>
-                <option>zone C</option>
-              </Input>
-              <span className="invalid-feedback">{Errors.zone}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <br />
-      <div className="container" id="search-btn">
-        <div className="input-group-append">
-          <button
-            className="btn btn-md btn-primary m-0"
-            onClick={handleZoneSubmit}
-            ref={zoneButtonElement}
-            type="button"
-          >
-            Submit
-          </button>
-          &nbsp;
-          <button
-            className="btn btn-md btn-primary m-0"
-            onClick={handleZoneEdit}
-            type="button"
-          >
-            Edit
-          </button>
-          &nbsp;
-          <button
-            className="btn btn-md btn-primary m-0"
-            onClick={handleZoneDelete}
-            type="button"
-          >
-            Delete
-          </button>
-        </div>
+          </form>
       </div>
       <br />
       <br />

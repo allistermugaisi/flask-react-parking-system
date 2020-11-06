@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { withRouter } from "react-router-dom";
+import { withRouter, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useSpring, animated } from "react-spring";
@@ -81,6 +81,39 @@ const MakeReservation = ({ history }) => {
     },
   ];
 
+  // const makePayment = () => {
+  //   FlutterwaveCheckout({
+  //     public_key: "FLWPUBK_TEST-dd1a7775d3c151e60e9557778af1aee3-X",
+  //     tx_ref: "hooli-tx-1920bbtyt",
+  //     amount: 54600,
+  //     currency: "KES",
+  //     country: "KE",
+  //     payment_options: "card, mpesa",
+  //     // specified redirect URL
+  //     redirect_url: "http://localhost:3000/reservation",
+  //     meta: {
+  //       consumer_id: 23,
+  //       consumer_mac: "92a3-912ba-1192a",
+  //     },
+  //     customer: {
+  //       email: "user@gmail.com",
+  //       phone_number: "08102909304",
+  //       name: "yemi desola",
+  //     },
+  //     callback: function (data) {
+  //       console.log(data);
+  //     },
+  //     onclose: function () {
+  //       // close modal
+  //     },
+  //     customizations: {
+  //       title: "My store",
+  //       description: "Payment for items in cart",
+  //       logo: "https://assets.piedpiper.com/logo.png",
+  //     },
+  //   });
+  // };
+
   const props = useSpring({
     from: {
       opacity: 0,
@@ -117,12 +150,12 @@ const MakeReservation = ({ history }) => {
             {Reservations.map((reservation, index) => {
               return (
                 <tr key={index}>
-                  <td>{reservation.slot_name}</td>
-                  <td>{reservation.zone}</td>
-                  <td>{reservation.entry_date}</td>
-                  <td>{reservation.exit_date}</td>
-                  <td>{reservation.cost}</td>
-                  <td>
+                  <td id="td-slots">{reservation.slot_name}</td>
+                  <td id="td-slots">{reservation.zone}</td>
+                  <td id="td-slots">{reservation.entry_date}</td>
+                  <td id="td-slots">{reservation.exit_date}</td>
+                  <td id="td-slots">{reservation.cost}</td>
+                  <td id="td-slots">
                     <button className="btn btn-md btn-danger " type="submit">
                       Remove
                     </button>
@@ -137,9 +170,9 @@ const MakeReservation = ({ history }) => {
           Total amount: <i id="price">KES 2,500</i>
         </p>
         <div id="pay-btn">
-          <button className="btn btn-md btn-primary" type="submit">
-            Pay Reservation
-          </button>
+          <Link className="btn btn-md btn-primary" to="/payment">
+            Pay Now
+          </Link>
         </div>
       </Container>
       <br />
