@@ -594,8 +594,9 @@ def payment():
     rave = Rave(app.config['MPESA_PUBLIC_KEY'],
                 app.config['MPESA_PRIVATE_KEY'], usingEnv=False)
 
-    # mobile payload
+    #Ensure currency is correctly defined
     payload = {
+        "currency": "KES",
         "amount": data["amount"],
         "phonenumber": data["phonenumber"],
         "email": data["email"],
@@ -605,18 +606,26 @@ def payment():
     }
     print(payload)
 
+    #remove these comments
+    #There's an issue with your exception handling - if Mpesa.charge works, but .verify doesn't, the except part will be exectued
+    #We don't want that, because we'd get the wrong error message. The verification failed, not the entire transaction
+    #Solution - Let's use nested try-excepts like so;
+
     try:
         res = rave.Mpesa.charge(payload)
-        res = rave.Mpesa.verify(res["txRef"])
-        print(res)
         return jsonify({'status': 'payment successful'}), 200
+
+        #Try to verify after transaction
+        try:
+            res = rave.Mpesa.verify(res["txRef"])
+            return jsonify({'status': 'verification successful'}), 200
+
+        except RaveExceptions.TransactionVerificationError as e:
+            print(e.err["errMsg"])
+            print(e.err["txRef"])
+            return jsonify({'status': 'Transaction verification failed'}), 403
 
     except RaveExceptions.TransactionChargeError as e:
         print(e.err["errMsg"])
         print(e.err["flwRef"])
         return jsonify({'status': 'Transaction not successful'}), 403
-
-    except RaveExceptions.TransactionVerificationError as e:
-        print(e.err["errMsg"])
-        print(e.err["txRef"])
-        return jsonify({'status': 'Transaction verification failed'}), 403
