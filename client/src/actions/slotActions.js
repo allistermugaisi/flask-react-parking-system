@@ -1,13 +1,13 @@
 import axios from "axios";
 import {
-    ADD_SLOT,
-    GET_SLOT,
-    DELETE_SLOT,
-    SLOT_LOADING
-  } from "../actions/types";
-  import { SLOT_SERVER } from "./config"
+  ADD_SLOT,
+  GET_SLOT,
+  DELETE_SLOT,
+  SLOT_LOADING,
+} from "../actions/types";
+import { SLOT_SERVER } from "./config";
 
-  // Setup config/headers and token
+// Setup config/headers and token
 
 export const tokenConfig = () => {
   // Get token from localStorage
@@ -28,44 +28,52 @@ export const tokenConfig = () => {
   return config;
 };
 
-
 export const getSlots = () => {
-    const request = axios.get(`${SLOT_SERVER}`,tokenConfig())
-    .then((response) => response.data);
+  const request = axios.get(`${SLOT_SERVER}`).then((response) => response.data);
 
-    return {
-        type: GET_SLOT,
-        payload: request,
-      };
-}
+  return {
+    type: GET_SLOT,
+    payload: request,
+  };
+};
 
-export const addSlot = ({slot_name,zone}) => {
+// export const addSlot = (slot) => (dispatch, getState) => {
+//   dispatch({
+//     type: GET_SLOT,
+//     payload: slot,
+//   });
+//   const reduxSlots = getState().slot.slots.slice();
+//   console.log(reduxSlots);
+// };
 
+export const addSlot = ({ slot_name, zone }) => {
   // Request body
   // Convert data to json format using JSON stringify
-  const body = JSON.stringify({ slot_name,zone });
+  const body = JSON.stringify({ slot_name, zone });
 
-   const request = axios.post(`${SLOT_SERVER}`,body,tokenConfig())
-   .then((response) => response.data);
+  const request = axios
+    .post(`${SLOT_SERVER}`, body, tokenConfig())
+    .then((response) => response.data);
 
-    return {
-        type: ADD_SLOT,
-        payload: request,
-      };
-}
+  return {
+    type: ADD_SLOT,
+    payload: request,
+  };
+};
 
-export const deleteSlot = id => {
-    const request = axios.delete(`${SLOT_SERVER}/${id}`,tokenConfig())
-    .then(response => response.data)
+export const deleteSlot = (id) => {
+  const request = axios
+    .delete(`${SLOT_SERVER}/${id}`, tokenConfig())
+    .then((response) => response.data);
 
-    return {
-        type: DELETE_SLOT,
-        payload: request,
-      };
- }
+  return {
+    type: DELETE_SLOT,
+    payload: request,
+  };
+};
 
- export const slotLoading = () => {
-    return {
-        type: SLOT_LOADING
-    }
-}
+export const slotLoading = () => {
+  return {
+    type: SLOT_LOADING,
+  };
+};

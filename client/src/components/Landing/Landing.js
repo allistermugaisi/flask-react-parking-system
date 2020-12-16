@@ -1,5 +1,5 @@
 import React from "react";
-import { Header, ParkingTitle, About, Footer } from "./index";
+import { Header, Search, ParkingTitle, About, Footer } from "./index";
 import ScrollToTop from "../utils/ScrollToTop";
 
 function Landing() {
@@ -10,6 +10,7 @@ function Landing() {
       <br />
       <br />
       <br />
+      <Search/>
       <br />
       <ParkingTitle />
       <ScrollToTop />

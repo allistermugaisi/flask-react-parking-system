@@ -45,7 +45,7 @@ function App() {
     <Suspense fallback={<div>Loading...</div>}>
       <div className="App">
         <Switch>
-          <Route exact path="/" component={Auth(Landing, true)} />
+          <Route exact path="/" component={Auth(Landing, null)} />
           <Route path="/login" component={Auth(LoginPage, false)} />
           <Route path="/register" component={Auth(RegisterPage, false)} />
           <Route
@@ -56,11 +56,11 @@ function App() {
             path="/reset_password/:id"
             component={Auth(ResetPassword, false)}
           />
-          <Route path="/reservation" component={Auth(MakeReservation, true)} />
-          <Route path="/zones/zone-a" component={ZoneA} />
-          <Route path="/zones/zone-b" component={ZoneB} />
-          <Route path="/zones/zone-c" component={ZoneC} />
-          <Route path="/zones/admin" component={Auth(ZoneAdmin,true)} />
+          <Route path="/reservation" component={Auth(MakeReservation, null)} />
+          <Route path="/zones/zone-a" component={Auth(ZoneA, null)} />
+          <Route path="/zones/zone-b" component={Auth(ZoneB, null)} />
+          <Route path="/zones/zone-c" component={Auth(ZoneC, null)} />
+          <Route path="/zones/admin" component={Auth(ZoneAdmin, true)} />
           <Route path="/admin/dashboard" component={dashboard} />
           <Route path="/admin/reservations" component={Reservation} />
           <Route path="/admin/help" component={Help} />

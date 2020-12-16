@@ -26,6 +26,9 @@
   background-color: #efefef;
   border-bottom-right-radius: 0.25rem;
   border-top-right-radius: 0.25rem;
+  border-bottom-left-radius: 0.25rem;
+  border-top-left-radius: 0.25rem;
+  padding: 0.3rem;
 }
 #display-none {
   display: none;

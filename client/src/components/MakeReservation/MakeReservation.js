@@ -1,10 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { withRouter, Link } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useSpring, animated } from "react-spring";
 import { Container, Table } from "react-bootstrap";
-import { reservation } from "../utils/UserFunctions";
+import { deleteReservation } from "../../actions/reservationAction";
+import {
+  returnErrors,
+  clearErrors,
+  reservationFail,
+} from "../../actions/errorActions";
 import useButtonLoader from "../utils/useButtonLoader";
 import NavBar from "../RegisterPage/NavBar/NavBar";
 import Footer from "../RegisterPage/Footer/Footer";
@@ -12,6 +18,10 @@ import "./MakeReservation.css";
 
 toast.configure();
 const MakeReservation = ({ history }) => {
+  const dispatch = useDispatch();
+
+  let Reservations = useSelector((state) => state.reservation.reservations);
+
   // const [reserveButtonElement, setButtonLoading] = useButtonLoader(
   //   "Make Reservation",
   //   "Loading"
@@ -43,43 +53,24 @@ const MakeReservation = ({ history }) => {
   //     history.push("/reservation");
   //   }
 
-  const Reservations = [
-    {
-      slot_name: "Slot-1",
-      zone: "zone A",
-      entry_date: "27/09/2020 12:30pm",
-      exit_date: "27/09/2020 6:30pm",
-      cost: "500",
-    },
-    {
-      slot_name: "Slot-3",
-      zone: "zone B",
-      entry_date: "28/09/2020 12:30pm",
-      exit_date: "28/09/2020 6:30pm",
-      cost: "1500",
-    },
-    {
-      slot_name: "Slot-7",
-      zone: "zone A",
-      entry_date: "29/09/2020 12:30pm",
-      exit_date: "29/09/2020 6:30pm",
-      cost: "750",
-    },
-    {
-      slot_name: "Slot-6",
-      zone: "zone C",
-      entry_date: "30/09/2020 12:30pm",
-      exit_date: "30/09/2020 6:30pm",
-      cost: "400",
-    },
-    {
-      slot_name: "Slot-8",
-      zone: "zone B",
-      entry_date: "01/10/2020 12:30pm",
-      exit_date: "02/10/2020 6:30pm",
-      cost: "800",
-    },
-  ];
+  // useEffect(() => {
+  //   dispatch(reservationLoading())
+  //   dispatch(getReservations())
+  //   .then(res => {
+  //     setReservations(res.payload.result)
+  //     dispatch(clearErrors());
+  //   }).catch(error => {
+  //     dispatch(
+  //       returnErrors(
+  //         error.response.data,
+  //         error.response.status,
+  //         "RESERVATION_FAIL"
+  //       )
+  //     );
+  //     dispatch(reservationFail());
+  //   })
+
+  // },[])
 
   // const makePayment = () => {
   //   FlutterwaveCheckout({
@@ -114,6 +105,23 @@ const MakeReservation = ({ history }) => {
   //   });
   // };
 
+  function handleDelete(slot) {
+    dispatch(deleteReservation(slot));
+    toast.error("Slot removed from cart!", {
+      position: toast.POSITION.TOP_CENTER,
+      autoClose: 3000,
+    });
+  }
+
+  const noAmount = `0.00`;
+
+  const totalCost =
+    Reservations && Reservations.length > 0
+      ? Reservations.map((reservation) => reservation.cost)
+          .reduce((acc, amount) => (acc += amount), 0)
+          .toFixed(2)
+      : noAmount;
+
   const props = useSpring({
     from: {
       opacity: 0,
@@ -140,34 +148,44 @@ const MakeReservation = ({ history }) => {
             <tr>
               <th>Slot Name</th>
               <th>Zone</th>
-              <th>Entry Date</th>
-              <th>Exit Date</th>
+              <th>Reserved Date</th>
               <th>Cost</th>
               <th>Remove from Reservation</th>
             </tr>
           </thead>
           <tbody>
-            {Reservations.map((reservation, index) => {
-              return (
-                <tr key={index}>
-                  <td id="td-slots">{reservation.slot_name}</td>
-                  <td id="td-slots">{reservation.zone}</td>
-                  <td id="td-slots">{reservation.entry_date}</td>
-                  <td id="td-slots">{reservation.exit_date}</td>
-                  <td id="td-slots">{reservation.cost}</td>
-                  <td id="td-slots">
-                    <button className="btn btn-md btn-danger " type="submit">
-                      Remove
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
+            {Reservations && Reservations.length > 0 ? (
+              Reservations.map((reservation, index) => {
+                return (
+                  <tr key={index}>
+                    <td id="td-slots">{reservation.slot_name}</td>
+                    <td id="td-slots">{reservation.zone}</td>
+                    <td id="td-slots">{reservation.date}</td>
+                    <td id="td-slots">{reservation.cost}</td>
+                    <td id="td-slots">
+                      <button
+                        className="btn btn-md btn-danger "
+                        type="submit"
+                        onClick={() => handleDelete(reservation)}
+                      >
+                        Remove
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td colSpan={8} id="td-slots">
+                  Reservation is empty
+                </td>
+              </tr>
+            )}
           </tbody>
         </Table>
         <br />
         <p id="amount">
-          Total amount: <i id="price">KES 2,500</i>
+          Total amount: <i id="price">Kes {totalCost}</i>
         </p>
         <div id="pay-btn">
           <Link className="btn btn-md btn-primary" to="/payment">

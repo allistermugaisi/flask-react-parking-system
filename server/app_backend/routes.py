@@ -20,6 +20,8 @@ from sqlalchemy.exc import IntegrityError
 # create an instance for the SlotsSchema i.e. slot_schema is for single data, slots_schema is when data is more than one
 slot_schema = SlotsSchema()
 slots_schema = SlotsSchema(many=True)
+reservation_schema = ReservationsSchema()
+reservations_schema = ReservationsSchema(many=True)
 
 
 # auth middleware to enable private routes
@@ -301,47 +303,48 @@ def reset_token(token):
     return jsonify({'message': 'Your password has been updated! You are now able to login'}), 200
 
     # @route GET api/reservation
-    # @desc GET get all reservations
+    # @desc GET get all reservations for all users
     # @access Private
 
 
 @app.route('/api/reservation', methods=['GET'])
+def get_all_reservations():
+    reservations = Reservations.query.all()
+
+    # the instance === reservation_schema === references when the data being queried is one. If more than one then change it to === reservations_schema ===
+    output = reservations_schema.dump(reservations)
+
+    return jsonify({'result': output}), 200
+
+    # @route GET api/reservation
+    # @desc GET get all reservations for a specific user
+    # @access Private
+
+
+@app.route('/api/user/reservations', methods=['GET'])
 @token_required
-def get_all_reservations(current_user):
+def get_user_reservations(current_user):
     reservations = Reservations.query.filter_by(user_id=current_user.id).all()
 
-    output = []
+    # the instance === reservation_schema === references when the data being queried is one. If more than one then change it to === reservations_schema ===
+    output = reservations_schema.dump(reservations)
 
-    for reservation in reservations:
-        reservation_data = {}
-        reservation_data['id'] = todo.id
-        reservation_data['entry_date'] = reservation.entry_date
-        reservation_data['exit_date'] = reservation.exit_date
-        reservation_data['complete'] = reservation.complete
-        output.append(reservation_data)
-
-    return jsonify({'reservations': output}), 201
+    return jsonify({'result': output}), 200
 
     # @route GET api/reservation/<reservation_id>
-    # @desc GET get one reservation
+    # @desc GET get one reservation for a specific user and not admin
     # @access Private
 
 
 @app.route('/api/reservation/<reservation_id>', methods=['GET'])
 @token_required
-def get_one_reservation(current_user, reservation_id):
+def get_one_user_reservation(current_user, reservation_id):
     reservation = Reservations.query.filter_by(
         id=reservation_id, user_id=current_user.id).first()
 
-    if not reservation:
-        return jsonify({'message': 'No reservation found!'}), 403
-        reservation_data = {}
-        reservation_data['id'] = todo.id
-        reservation_data['entry_date'] = reservation.entry_date
-        reservation_data['exit_date'] = reservation.exit_date
-        reservation_data['complete'] = reservation.complete
+    output = reservation_schema.dump(reservation)
 
-    return jsonify(reservation_data), 201
+    return jsonify({'result': output}), 200
 
     # @route POST api/reservation
     # @desc POST create reservation
@@ -448,21 +451,106 @@ def addSlots(current_user):
 
 
 @app.route('/api/slots', methods=['GET'])
-@token_required
-def get_all_slots(current_user):
-    if not current_user.admin:
-        return jsonify({'message': 'None admin users cannot perform that function!'}), 403
+def get_all_slots():
 
     slots = Slots.query.all()
 
-    # the instance === slots_schema === references when the data being queried is one. If more than one then change it to === slots_schema ===
-    output = slots_schema.dump(slots)
+    if not slots:
+        return jsonify({'message': 'No slots found!'}), 401
+
+    # Main object
+    output = []
+
+    for slot in slots:
+
+        # Declare date object
+        dates = []
+
+        today = datetime.date.today()
+        number_of_days = 7
+
+        for day in range(number_of_days):
+            a_date = (today + datetime.timedelta(days=day)).isoformat()
+            dates.append(a_date)
+
+        # declare objects
+        slots_data = {}
+        slot_details = {}
+        slot_id = {}
+        slot_id1 = {}
+        slot_id2 = {}
+        slot_id3 = {}
+        slot_id4 = {}
+        slot_id5 = {}
+        slot_id6 = {}
+
+        # Populate data in slots_data object
+        slots_data['id'] = slot.id
+        slots_data['slot_name'] = slot.slot_name
+        slots_data['zone'] = slot.zone
+        slots_data['slot_details'] = slot_details
+
+        # Populate data in slot_details object
+        slot_details['slot_id'] = slot_id
+        slot_details['slot_id1'] = slot_id1
+        slot_details['slot_id2'] = slot_id2
+        slot_details['slot_id3'] = slot_id3
+        slot_details['slot_id4'] = slot_id4
+        slot_details['slot_id5'] = slot_id5
+        slot_details['slot_id6'] = slot_id6
+
+        # Populate data in the respective slot_id's
+        slot_id['id'] = f'{slot.id}{dates[0]}'
+        slot_id['reserved'] = False
+        slot_id['toggled'] = False 
+        slot_id['cost'] = 300 
+        slot_id['date'] = f'{dates[0]}'
+
+        slot_id1['id'] = f'{slot.id}{dates[1]}'
+        slot_id1['reserved'] = False 
+        slot_id1['toggled'] = False 
+        slot_id1['cost'] = 300 
+        slot_id1['date'] = f'{dates[1]}'
+
+        slot_id2['id'] = f'{slot.id}{dates[2]}'
+        slot_id2['reserved'] = False
+        slot_id2['toggled'] = False 
+        slot_id2['cost'] = 300 
+        slot_id2['date'] = f'{dates[2]}'
+
+        slot_id3['id'] = f'{slot.id}{dates[3]}'
+        slot_id3['reserved'] = False
+        slot_id3['toggled'] = False 
+        slot_id3['cost'] = 300 
+        slot_id3['date'] = f'{dates[3]}'
+
+        slot_id4['id'] = f'{slot.id}{dates[4]}'
+        slot_id4['reserved'] = False 
+        slot_id4['toggled'] = False 
+        slot_id4['cost'] = 300 
+        slot_id4['date'] = f'{dates[4]}'
+
+        slot_id5['id'] = f'{slot.id}{dates[5]}'
+        slot_id5['reserved'] = False 
+        slot_id5['toggled'] = False 
+        slot_id5['cost'] = 300 
+        slot_id5['date'] = f'{dates[5]}'
+
+        slot_id6['id'] = f'{slot.id}{dates[6]}'
+        slot_id6['reserved'] = False 
+        slot_id6['toggled'] = False 
+        slot_id6['cost'] = 300 
+        slot_id6['date'] = f'{dates[6]}'
+               
+        output.append(slots_data)
+
+
     return jsonify({'result': output}), 201
+
 
     # @route DELETE api/slots
     # @desc DELETE slot
     # @access Private
-
 
 @app.route('/api/slots/<slot_id>', methods=['DELETE'])
 @token_required
@@ -620,3 +708,16 @@ def payment():
         print(e.err["errMsg"])
         print(e.err["txRef"])
         return jsonify({'status': 'Transaction verification failed'}), 403
+
+
+# @app.route('/search', methods=['GET', 'POST'])
+# def search():
+#     searchForm = searchForm()
+#     courses = models.Course.query
+
+#     if searchForm.validate_on_submit():
+#         courses = courses.filter(models.Course.name.like('%' + searchForm.courseName.data + '%'))
+
+#     courses = courses.order_by(models.Course.name).all()
+
+#     return render_template('courselist.html', courses = courses)
