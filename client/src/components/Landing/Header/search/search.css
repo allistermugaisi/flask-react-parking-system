@@ -1,0 +1,24 @@
+/* Smartphones (portrait and landscape) ----------- */
+@media only screen and (min-device-width: 320px) and (max-device-width: 480px) {
+  #mobile-view {
+    padding-top: 70px;
+  }
+}
+#available-parking {
+  background-color: #2680eb;
+  padding: 15px;
+}
+#available-parking span {
+  color: #ffffff;
+  font-weight: 500;
+  font-size: 20px;
+}
+#date-parking {
+  padding: 15px;
+  text-align: center;
+}
+#date-parking span {
+  color: #2680eb;
+  font-weight: 500;
+  font-size: 20px;
+}

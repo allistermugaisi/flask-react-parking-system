@@ -43,25 +43,6 @@ const Header = (props) => {
 
   let isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
 
-  // const userLink = (
-  //   <Fragment>
-  //     <li className="nav-item">
-  //       <Link
-  //         className="nav-links"
-  //         to="/user-profile/dashboard"
-  //         onClick={closeMobileMenu}
-  //       >
-  //         Profile
-  //       </Link>
-  //     </li>
-  //     <li className="nav-item">
-  //       <Link className="nav-links" to="#" onClick={logOutUser}>
-  //         LogOut
-  //       </Link>
-  //     </li>
-  //   </Fragment>
-  // );
-
   return (
     <Fragment>
       <div className="header">

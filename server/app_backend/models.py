@@ -59,7 +59,7 @@ class Reservations(db.Model):
 
 class ReservationsSchema(ma.Schema):
     class Meta:
-        fields = ('public_reservation_id', 'reserved_date', 'zone',
+        fields = ('public_reservation_id', 'reserved_date', 'zone', 'slot_number',
                   'cost', 'reserved_slot', 'complete', 'date_created')
 
 

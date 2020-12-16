@@ -4,6 +4,8 @@ import {
   LOGIN_FAIL,
   REGISTER_FAIL,
   SLOT_FAIL,
+  SLOT_DAYS_FAIL,
+  RESERVATION_FAIL,
   AUTH_ERROR,
 } from "./types";
 
@@ -46,6 +48,20 @@ export const registerFail = () => {
 export const slotFail = () => {
   return {
     type: SLOT_FAIL,
+  };
+};
+
+// Slot Days Fail
+export const slotDaysFail = () => {
+  return {
+    type: SLOT_DAYS_FAIL,
+  };
+};
+
+// Reservation Fail
+export const reservationFail = () => {
+  return {
+    type: RESERVATION_FAIL,
   };
 };
 

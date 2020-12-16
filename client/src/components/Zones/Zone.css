@@ -42,9 +42,9 @@
   cursor: pointer;
   text-align: center;
 }
-.table td:hover {
+/* .table td:hover {
   background-color: #2680eb;
-}
+} */
 #td-slots {
   cursor: default;
   border: none;
@@ -63,10 +63,13 @@
 }
 .slot {
   margin: 10px;
-  transition: background-color 0.1 ease-in-out;
+  transition: background-color 0.5 ease-in-out;
 }
 .inactive {
   background-color: #f39c12;
+}
+.exists {
+  background-color: #e8f2fd;
 }
 .active {
   background-color: #3498db;

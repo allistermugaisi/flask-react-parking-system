@@ -7,7 +7,7 @@ const Pagination = ({ slotsPerPage, totalSlots, paginate }) => {
     pageNumbers.push(i);
   }
   return (
-    <nav className="pagination" style={{cursor:"pointer"}}>
+    <nav className="pagination" style={{ cursor: "pointer" }}>
       {pageNumbers.map((number) => (
         <li key={number} className="page-item">
           <a onClick={() => paginate(number)} className="page-link">

@@ -1,6 +1,5 @@
-from datetime import datetime
+import datetime
 import calendar
-from threading import Timer
 import time
 
 
@@ -9,23 +8,29 @@ import time
 # days_till_end_month = days_in_current_month - today.day
 
 
-now = datetime.now()
-entry_date = datetime(2020, 9, 19, 23, 30, 30)
-exit_date = datetime(2020, 10, 3, 23, 30, 30)
-duration = exit_date - entry_date
-current_reservation_time = exit_date - now
+# now = datetime.now()
+# entry_date = datetime(2020, 9, 19, 23, 30, 30)
+# exit_date = datetime(2020, 10, 3, 23, 30, 30)
+# duration = exit_date - entry_date
+# current_reservation_time = exit_date - now
 
-elapse_time = entry_date + duration
+# elapse_time = entry_date + duration
 # print(current_reservation_time)
 
+today = datetime.date.today()
+start_day = today
+three_weeks = [start_day + datetime.timedelta(days=x) for x in range(7)]
 
-def switchbool():
-    available = False
-    print(available)
+# print(start_day)
+# print(three_weeks)
+number_of_days = 7
 
+date_list = []
+for day in range(number_of_days):
+    a_date = (today + datetime.timedelta(days=day)).isoformat()
+    date_list.append(a_date)
 
-t = Timer(9.0, switchbool)  # will call the switchbool function after 3 seconds
-t.start()
+print(date_list[0])
 
 
 # myObjects = [0, 2, 8, 7, 1, 4, 3, 21]
